@@ -1,0 +1,606 @@
+/**
+ * TEXTOS DE LA INTERFAZ
+ * Etiquetas de menús, botones y encabezados, en español e inglés.
+ * Los datos del negocio (teléfonos, horarios, servicios) NO van aquí:
+ * están en src/data/negocio.ts.
+ */
+import type { Idioma } from '../data/negocio';
+import type { ClavePagina } from './rutas';
+
+const es = {
+  saltarAlContenido: 'Saltar al contenido',
+  menu: {
+    abrir: 'Abrir menú',
+    cerrar: 'Cerrar menú',
+    principal: 'Menú principal',
+    idioma: 'English',
+    idiomaDescripcion: 'View this page in English',
+  },
+  paginas: {
+    inicio: 'Inicio',
+    habitaciones: 'Habitaciones',
+    restaurante: 'Restaurante',
+    menu: 'Menú',
+    galeria: 'Galería',
+    ubicacion: 'Ubicación y contacto',
+    politicas: 'Políticas',
+    privacidad: 'Aviso de privacidad',
+    gracias: 'Mensaje enviado',
+  } satisfies Record<ClavePagina, string>,
+  navegacion: {
+    ubicacion: 'Ubicación',
+  },
+  acciones: {
+    reservar: 'Reservar habitación',
+    reservarCorto: 'Reservar',
+    verRestaurante: 'Ver el restaurante',
+    verHabitaciones: 'Ver las habitaciones',
+    verMenu: 'Ver el menú',
+    llamar: 'Llamar',
+    comoLlegar: 'Cómo llegar',
+    whatsapp: 'WhatsApp',
+    whatsappHotel: 'Escribir al hotel por WhatsApp',
+    whatsappRestaurante: 'Escribir al restaurante por WhatsApp',
+  },
+  whatsappNota: 'Se abre WhatsApp con el mensaje ya escrito. Solo agrega tus fechas y envíalo.',
+  inicio: {
+    titulo: 'Hotel Casa María Elena en el Centro Histórico de Durango',
+    descripcion:
+      'Hotel colonial en el Centro Histórico de Durango, con estacionamiento gratis, recepción 24 horas y el restaurante Rincón Ma’ Elena. Reserva directo por WhatsApp.',
+    entrada:
+      'Un hotel colonial en el Centro Histórico de Durango, con el patio y la cocina mexicana del Rincón Ma’ Elena dentro de casa.',
+    fotoPortada: 'Patio interior del hotel, rodeado de arcos de cantera y macetas con plantas',
+    razonesTitulo: 'Por qué hospedarte aquí',
+    razones: [
+      {
+        clave: 'ubicacion',
+        titulo: 'En pleno centro',
+        texto: 'Estás en Pino Suárez, Zona Centro. La Catedral y Paseo Durango quedan a unos 15 minutos a pie.',
+      },
+      {
+        clave: 'estacionamiento',
+        titulo: 'Estacionamiento gratis',
+        texto: 'Deja el coche en el hotel sin costo y recorre el centro caminando.',
+      },
+      {
+        clave: 'recepcion',
+        titulo: 'Recepción 24 horas',
+        texto: 'Llega a la hora que llegues: siempre hay alguien para recibirte, y café a cualquier hora.',
+      },
+    ],
+    habitaciones: {
+      titulo: 'Habitaciones',
+      texto: 'Cuartos con WiFi, aire acondicionado y calefacción. Hay habitaciones familiares y cuartos para no fumadores.',
+    },
+    restaurante: {
+      texto: 'El restaurante de la casa. Desayuna o come en el patio, entre plantas; está abierto a todo el público.',
+      fotoAlt: 'Mesa servida en el patio del restaurante Rincón Ma’ Elena',
+      horario: 'Horario',
+      google: 'En Google',
+      calificacion: (promedio: number, total: string) => `${promedio} de 5, con ${total}`,
+      mencionan: 'Lo que más mencionan',
+      llamar: (telefono: string) => `Llamar al ${telefono}`,
+    },
+    mapa: {
+      titulo: 'Dónde estamos',
+      tituloMapa: 'Mapa: ubicación del Hotel Casa María Elena',
+    },
+  },
+  habitaciones: {
+    titulo: 'Habitaciones',
+    descripcion:
+      'Habitaciones del Hotel Casa María Elena en el centro de Durango: WiFi, aire acondicionado y calefacción, TV por cable y estacionamiento gratis. Reserva directo por WhatsApp.',
+    entrada:
+      'Cuartos con WiFi, aire acondicionado y calefacción. Hay habitaciones familiares y cuartos para no fumadores.',
+    fecha: {
+      etiqueta: 'Fecha de llegada',
+      ayuda: 'Elige tu fecha y el mensaje de WhatsApp la llevará escrita.',
+      vacio: '[fecha]',
+    },
+    tipo: (numero: number) => `Habitación tipo ${numero}`,
+    tipoMensaje: (numero: number) => `tipo ${numero}`,
+    capacidad: 'Capacidad',
+    personas: (n: number) => (n === 1 ? '1 persona' : `Hasta ${n} personas`),
+    camas: 'Camas',
+    incluye: 'Incluye',
+    desde: 'Desde',
+    porNoche: 'MXN por noche',
+    reservarEsta: 'Reservar esta habitación',
+    pendientes: {
+      nombre: 'nombre del tipo de habitación',
+      capacidad: 'capacidad',
+      camas: 'camas',
+      precio: 'precio por noche',
+    },
+    serviciosTitulo: 'Servicios del hotel',
+    horariosTitulo: 'Entrada y salida',
+    mascotas: 'No se aceptan mascotas.',
+    verPoliticas: 'Ver todas las políticas',
+  },
+  resenas: {
+    titulo: 'Lo que dicen quienes nos visitan',
+    calificacion: (nombre: string) => `Calificación de ${nombre} en Google`,
+    deCinco: 'de 5',
+    enGoogle: (total: string) => `${total} en Google`,
+    verTodas: 'Ver todas en Google',
+    filtrar: 'Filtrar reseñas',
+    filtros: { todas: 'Todas', hotel: 'Hotel', restaurante: 'Restaurante' },
+    estrellas: '5 de 5 estrellas',
+    leerMas: 'Leer más',
+    leerMenos: 'Leer menos',
+    anterior: 'Reseña anterior',
+    siguiente: 'Reseña siguiente',
+    pausar: 'Pausar',
+    reanudar: 'Reanudar',
+    pausarLargo: 'Pausar el avance automático de las reseñas',
+    reanudarLargo: 'Reanudar el avance automático de las reseñas',
+    posicion: 'Reseña {n} de {total}',
+    carrusel: 'carrusel',
+    pendiente: 'reseña real',
+    sobre: { hotel: 'Sobre el hotel', restaurante: 'Sobre el restaurante' },
+  },
+  restaurante: {
+    titulo: 'Restaurante Rincón Ma’ Elena: desayunos y cocina mexicana en Durango',
+    descripcion:
+      'Rincón Ma’ Elena, restaurante de cocina mexicana en el centro de Durango: desayunos, comidas, panadería y bar en un patio lleno de plantas. Abierto todos los días de 8:00 a 22:00.',
+    lugar: 'Restaurante en el Centro Histórico de Durango',
+    entrada:
+      'Cocina mexicana en un patio lleno de plantas, dentro del Hotel Casa María Elena. Desayunos, comidas, panadería y bar.',
+    abierto: 'Abierto a todo el público, te hospedes o no en el hotel.',
+    fotoPortada: 'Plantas y macetas en el patio del restaurante Rincón Ma’ Elena',
+    secciones: 'Secciones de esta página',
+    navegacion: { favoritos: 'Favoritos', patio: 'El patio', resenas: 'Reseñas', visita: 'Cómo llegar' },
+    favoritosTitulo: 'Los favoritos de quienes vienen',
+    favoritosTexto: 'Lo que más aparece en las reseñas del restaurante.',
+    favoritos: [
+      { clave: 'chilaquiles', nombre: 'Chilaquiles', alt: 'Plato de chilaquiles del Rincón Ma’ Elena' },
+      { clave: 'huevos-rancheros', nombre: 'Huevos rancheros', alt: 'Plato de huevos rancheros del Rincón Ma’ Elena' },
+      { clave: 'capuchino', nombre: 'Capuchino', alt: 'Taza de capuchino servida en el restaurante' },
+      { clave: 'panaderia', nombre: 'Pan de la casa', alt: 'Pan de la panadería del restaurante' },
+    ],
+    patioTitulo: 'El patio',
+    patioTexto: 'Mesas rodeadas de plantas. Es lo que más mencionan quienes vienen, y lo que más fotografían.',
+    fotosPatio: {
+      'patio-2': 'Vista amplia del patio, con mesas entre las plantas',
+      'restaurante-2': 'Mesa servida en el patio',
+      'patio-4': 'Comensales en las mesas del patio',
+      'restaurante-1': 'Salón interior del restaurante',
+    },
+    visitaTitulo: 'Ven a comer',
+    horario: 'Horario',
+    direccion: 'Dirección',
+    dentroDe: 'Dentro del Hotel Casa María Elena',
+    telefono: 'Teléfono',
+    tambien: 'Lo que también destacan',
+    llamar: (telefono: string) => `Llamar al ${telefono}`,
+    tituloMapa: 'Mapa: ubicación del restaurante Rincón Ma’ Elena',
+  },
+  carta: {
+    titulo: 'Menú de Rincón Ma’ Elena',
+    descripcion:
+      'Menú del restaurante Rincón Ma’ Elena en Durango: desayunos, comidas, panadería y bar. Abierto todos los días de 8:00 a 22:00.',
+    encabezado: 'Menú',
+    volver: 'Rincón Ma’ Elena',
+    secciones: 'Secciones del menú',
+    moneda: 'Precios en pesos mexicanos.',
+    pendienteMenu: 'menú y precios actuales',
+    pendientePrecio: 'precio',
+    pendienteSeccion: 'platillos de esta sección',
+    cierre: 'El restaurante está abierto a todo el público.',
+  },
+  galeria: {
+    titulo: 'Galería',
+    descripcion:
+      'Fotos del Hotel Casa María Elena en Durango: fachada, habitaciones, el patio con plantas y el restaurante Rincón Ma’ Elena.',
+    entrada: 'La casa por dentro y por fuera: la fachada, las habitaciones, el patio y el restaurante.',
+    secciones: 'Secciones de la galería',
+    ampliar: 'Ampliar foto',
+    visor: 'Foto ampliada',
+    cerrar: 'Cerrar',
+    anterior: 'Foto anterior',
+    siguiente: 'Foto siguiente',
+  },
+  ubicacion: {
+    titulo: 'Ubicación y contacto',
+    descripcion:
+      'Hotel Casa María Elena está en Pino Suárez #804 Oriente, Zona Centro, Durango. Mapa, cómo llegar, lugares cercanos, teléfono, WhatsApp y formulario de contacto.',
+    tituloMapa: 'Mapa: ubicación del Hotel Casa María Elena',
+    llegarTitulo: 'Cómo llegar',
+    llegar: [
+      { titulo: 'En coche', texto: 'El hotel tiene estacionamiento gratis.' },
+      { titulo: 'A cualquier hora', texto: 'La recepción atiende las 24 horas.' },
+    ],
+    rutasTitulo: 'Abre la ruta en Google Maps',
+    rutaActual: 'Desde donde estás',
+    lugaresTitulo: 'Qué hay cerca',
+    lugaresTexto: 'Lugares conocidos del Centro Histórico. Cada enlace abre la ruta a pie desde el hotel.',
+    verRuta: 'Ver ruta a pie',
+    verRutaA: (lugar: string) => `Ver ruta a pie a ${lugar}`,
+    pendienteLugares: 'lista de lugares recomendados por el hotel',
+    contactoTitulo: 'Contacto',
+    canales: {
+      telefono: 'Teléfono del hotel',
+      whatsapp: 'WhatsApp del hotel',
+      correo: 'Correo',
+      restaurante: 'Restaurante',
+      facebook: 'Facebook',
+    },
+    pendienteWhatsApp: 'WhatsApp del hotel',
+    formulario: {
+      titulo: 'Escríbenos',
+      ayuda: 'Para reservar más rápido, usa WhatsApp o llama a recepción.',
+      nombre: 'Nombre',
+      correo: 'Correo electrónico',
+      telefono: 'Teléfono (opcional)',
+      mensaje: 'Mensaje',
+      consentimiento: 'Acepto el',
+      aviso: 'aviso de privacidad',
+      enviar: 'Enviar mensaje',
+      trampa: 'No llenes este campo',
+    },
+  },
+  politicas: {
+    titulo: 'Políticas del hotel',
+    descripcion:
+      'Políticas del Hotel Casa María Elena en Durango: horarios de entrada y salida, mascotas, cancelación y facturación.',
+    entrada: 'Lo que conviene saber antes de reservar.',
+    lista: {
+      checkIn: {
+        titulo: 'Entrada',
+        texto: (hora: string) =>
+          `Las habitaciones se entregan desde las ${hora}. La recepción atiende las 24 horas.`,
+      },
+      checkOut: {
+        titulo: 'Salida',
+        texto: (hora: string) => `La habitación se entrega a más tardar a las ${hora}.`,
+      },
+      mascotas: {
+        titulo: 'Mascotas',
+        no: 'No se aceptan mascotas.',
+        si: 'Se aceptan mascotas.',
+      },
+      cancelacion: { titulo: 'Cancelación', pendiente: 'política de cancelación y anticipo' },
+      facturacion: {
+        titulo: 'Facturación',
+        texto: 'El hotel emite factura.',
+        pendiente: 'cómo y hasta cuándo solicitar la factura',
+      },
+    },
+    dudas: '¿Tienes una duda que no está aquí?',
+  },
+  privacidad: {
+    titulo: 'Aviso de privacidad',
+    descripcion: 'Aviso de privacidad del Hotel Casa María Elena: qué datos personales recibe y para qué los usa.',
+    pendiente: 'revisión legal del aviso',
+  },
+  gracias: {
+    titulo: 'Mensaje enviado',
+    encabezado: 'Recibimos tu mensaje',
+    texto: 'Gracias por escribir. Tu mensaje llegó al correo del hotel.',
+    urgente: 'Si necesitas una respuesta hoy, llama a recepción.',
+    volver: 'Volver al inicio',
+  },
+  pie: {
+    hotel: 'Hotel',
+    restaurante: 'Restaurante',
+    sitio: 'En este sitio',
+    direccion: 'Dirección',
+    telefono: 'Teléfono',
+    correo: 'Correo',
+    horario: 'Horario',
+    de: 'de',
+    a: 'a',
+    facebook: 'Facebook del hotel',
+    derechos: 'Todos los derechos reservados.',
+  },
+  horarios: {
+    checkIn: 'Entrada desde las',
+    checkOut: 'Salida hasta las',
+  },
+};
+
+const en: typeof es = {
+  saltarAlContenido: 'Skip to content',
+  menu: {
+    abrir: 'Open menu',
+    cerrar: 'Close menu',
+    principal: 'Main menu',
+    idioma: 'Español',
+    idiomaDescripcion: 'Ver esta página en español',
+  },
+  paginas: {
+    inicio: 'Home',
+    habitaciones: 'Rooms',
+    restaurante: 'Restaurant',
+    menu: 'Menu',
+    galeria: 'Gallery',
+    ubicacion: 'Location and contact',
+    politicas: 'Policies',
+    privacidad: 'Privacy notice',
+    gracias: 'Message sent',
+  },
+  navegacion: {
+    ubicacion: 'Location',
+  },
+  acciones: {
+    reservar: 'Book a room',
+    reservarCorto: 'Book',
+    verRestaurante: 'See the restaurant',
+    verHabitaciones: 'See the rooms',
+    verMenu: 'See the menu',
+    llamar: 'Call',
+    comoLlegar: 'Get directions',
+    whatsapp: 'WhatsApp',
+    whatsappHotel: 'Message the hotel on WhatsApp',
+    whatsappRestaurante: 'Message the restaurant on WhatsApp',
+  },
+  whatsappNota: 'WhatsApp opens with the message already written. Just add your dates and send it.',
+  inicio: {
+    titulo: 'Hotel Casa María Elena in Durango’s Historic Center',
+    descripcion:
+      'A colonial hotel in the Historic Center of Durango, Mexico, with free parking, a 24-hour front desk and Rincón Ma’ Elena restaurant. Book directly on WhatsApp.',
+    entrada:
+      'A colonial hotel in Durango’s Historic Center, with the plant-filled patio and Mexican kitchen of Rincón Ma’ Elena under the same roof.',
+    fotoPortada: 'The hotel’s inner patio, framed by stone arches and potted plants',
+    razonesTitulo: 'Why stay here',
+    razones: [
+      {
+        clave: 'ubicacion',
+        titulo: 'Right downtown',
+        texto: 'You are on Pino Suárez street, in Zona Centro. The Cathedral and Paseo Durango are about a 15-minute walk away.',
+      },
+      {
+        clave: 'estacionamiento',
+        titulo: 'Free parking',
+        texto: 'Leave your car at the hotel at no charge and explore downtown on foot.',
+      },
+      {
+        clave: 'recepcion',
+        titulo: '24-hour front desk',
+        texto: 'Arrive whenever you arrive: someone is always there to welcome you, and coffee is on at any hour.',
+      },
+    ],
+    habitaciones: {
+      titulo: 'Rooms',
+      texto: 'Rooms with WiFi, air conditioning and heating. Family rooms and non-smoking rooms are available.',
+    },
+    restaurante: {
+      texto: 'The house restaurant. Have breakfast or lunch on the patio, among the plants; it is open to everyone, not only hotel guests.',
+      fotoAlt: 'A table set on the patio of Rincón Ma’ Elena restaurant',
+      horario: 'Hours',
+      google: 'On Google',
+      calificacion: (promedio: number, total: string) => `${promedio} out of 5, with ${total}`,
+      mencionan: 'What guests mention most',
+      llamar: (telefono: string) => `Call ${telefono}`,
+    },
+    mapa: {
+      titulo: 'Where we are',
+      tituloMapa: 'Map: location of Hotel Casa María Elena',
+    },
+  },
+  habitaciones: {
+    titulo: 'Rooms',
+    descripcion:
+      'Rooms at Hotel Casa María Elena in downtown Durango, Mexico: WiFi, air conditioning and heating, cable TV and free parking. Book directly on WhatsApp.',
+    entrada:
+      'Rooms with WiFi, air conditioning and heating. Family rooms and non-smoking rooms are available.',
+    fecha: {
+      etiqueta: 'Arrival date',
+      ayuda: 'Pick your date and the WhatsApp message will include it.',
+      vacio: '[date]',
+    },
+    tipo: (numero: number) => `Room type ${numero}`,
+    tipoMensaje: (numero: number) => `type ${numero}`,
+    capacidad: 'Sleeps',
+    personas: (n: number) => (n === 1 ? '1 guest' : `Up to ${n} guests`),
+    camas: 'Beds',
+    incluye: 'Includes',
+    desde: 'From',
+    porNoche: 'MXN per night',
+    reservarEsta: 'Book this room',
+    pendientes: {
+      nombre: 'nombre del tipo de habitación',
+      capacidad: 'capacidad',
+      camas: 'camas',
+      precio: 'precio por noche',
+    },
+    serviciosTitulo: 'Hotel services',
+    horariosTitulo: 'Check-in and check-out',
+    mascotas: 'Pets are not allowed.',
+    verPoliticas: 'See all policies',
+  },
+  resenas: {
+    titulo: 'What our guests say',
+    calificacion: (nombre: string) => `${nombre} rating on Google`,
+    deCinco: 'out of 5',
+    enGoogle: (total: string) => `${total} on Google`,
+    verTodas: 'See all on Google',
+    filtrar: 'Filter reviews',
+    filtros: { todas: 'All', hotel: 'Hotel', restaurante: 'Restaurant' },
+    estrellas: '5 out of 5 stars',
+    leerMas: 'Read more',
+    leerMenos: 'Read less',
+    anterior: 'Previous review',
+    siguiente: 'Next review',
+    pausar: 'Pause',
+    reanudar: 'Resume',
+    pausarLargo: 'Pause the automatic rotation of reviews',
+    reanudarLargo: 'Resume the automatic rotation of reviews',
+    posicion: 'Review {n} of {total}',
+    carrusel: 'carousel',
+    pendiente: 'reseña real',
+    sobre: { hotel: 'About the hotel', restaurante: 'About the restaurant' },
+  },
+  restaurante: {
+    titulo: 'Rincón Ma’ Elena restaurant: breakfast and Mexican food in Durango',
+    descripcion:
+      'Rincón Ma’ Elena, a Mexican restaurant in downtown Durango, Mexico: breakfast, lunch, fresh bread and a bar on a plant-filled patio. Open every day from 8 AM to 10 PM.',
+    lugar: 'Restaurant in Durango’s Historic Center',
+    entrada:
+      'Mexican cooking on a plant-filled patio, inside Hotel Casa María Elena. Breakfast, lunch, fresh bread and a bar.',
+    abierto: 'Open to everyone, whether or not you are staying at the hotel.',
+    fotoPortada: 'Plants and flowerpots on the patio of Rincón Ma’ Elena restaurant',
+    secciones: 'Sections of this page',
+    navegacion: { favoritos: 'Favorites', patio: 'The patio', resenas: 'Reviews', visita: 'Getting here' },
+    favoritosTitulo: 'Guest favorites',
+    favoritosTexto: 'What shows up most often in the restaurant’s reviews.',
+    favoritos: [
+      { clave: 'chilaquiles', nombre: 'Chilaquiles', alt: 'A plate of chilaquiles at Rincón Ma’ Elena' },
+      { clave: 'huevos-rancheros', nombre: 'Huevos rancheros', alt: 'A plate of huevos rancheros at Rincón Ma’ Elena' },
+      { clave: 'capuchino', nombre: 'Cappuccino', alt: 'A cup of cappuccino served at the restaurant' },
+      { clave: 'panaderia', nombre: 'House bread', alt: 'Bread from the restaurant’s bakery' },
+    ],
+    patioTitulo: 'The patio',
+    patioTexto: 'Tables surrounded by plants. It is what guests mention most, and what they photograph most.',
+    fotosPatio: {
+      'patio-2': 'A wide view of the patio, with tables among the plants',
+      'restaurante-2': 'A table set on the patio',
+      'patio-4': 'Diners at the patio tables',
+      'restaurante-1': 'The restaurant’s indoor dining room',
+    },
+    visitaTitulo: 'Come eat',
+    horario: 'Hours',
+    direccion: 'Address',
+    dentroDe: 'Inside Hotel Casa María Elena',
+    telefono: 'Phone',
+    tambien: 'Guests also mention',
+    llamar: (telefono: string) => `Call ${telefono}`,
+    tituloMapa: 'Map: location of Rincón Ma’ Elena restaurant',
+  },
+  carta: {
+    titulo: 'Rincón Ma’ Elena menu',
+    descripcion:
+      'Menu of Rincón Ma’ Elena restaurant in Durango, Mexico: breakfast, lunch, bakery and bar. Open every day from 8 AM to 10 PM.',
+    encabezado: 'Menu',
+    volver: 'Rincón Ma’ Elena',
+    secciones: 'Menu sections',
+    moneda: 'Prices in Mexican pesos.',
+    pendienteMenu: 'menú y precios actuales',
+    pendientePrecio: 'precio',
+    pendienteSeccion: 'platillos de esta sección',
+    cierre: 'The restaurant is open to everyone.',
+  },
+  galeria: {
+    titulo: 'Gallery',
+    descripcion:
+      'Photos of Hotel Casa María Elena in Durango, Mexico: the façade, the rooms, the plant-filled patio and Rincón Ma’ Elena restaurant.',
+    entrada: 'The house inside and out: the façade, the rooms, the patio and the restaurant.',
+    secciones: 'Gallery sections',
+    ampliar: 'Enlarge photo',
+    visor: 'Enlarged photo',
+    cerrar: 'Close',
+    anterior: 'Previous photo',
+    siguiente: 'Next photo',
+  },
+  ubicacion: {
+    titulo: 'Location and contact',
+    descripcion:
+      'Hotel Casa María Elena is at Pino Suárez #804 Oriente, Zona Centro, Durango, Mexico. Map, directions, nearby places, phone, WhatsApp and contact form.',
+    tituloMapa: 'Map: location of Hotel Casa María Elena',
+    llegarTitulo: 'Getting here',
+    llegar: [
+      { titulo: 'By car', texto: 'The hotel has free parking.' },
+      { titulo: 'At any hour', texto: 'The front desk is open 24 hours.' },
+    ],
+    rutasTitulo: 'Open the route in Google Maps',
+    rutaActual: 'From where you are',
+    lugaresTitulo: 'What is nearby',
+    lugaresTexto: 'Well-known places in the Historic Center. Each link opens the walking route from the hotel.',
+    verRuta: 'See walking route',
+    verRutaA: (lugar: string) => `See walking route to ${lugar}`,
+    pendienteLugares: 'lista de lugares recomendados por el hotel',
+    contactoTitulo: 'Contact',
+    canales: {
+      telefono: 'Hotel phone',
+      whatsapp: 'Hotel WhatsApp',
+      correo: 'Email',
+      restaurante: 'Restaurant',
+      facebook: 'Facebook',
+    },
+    pendienteWhatsApp: 'WhatsApp del hotel',
+    formulario: {
+      titulo: 'Write to us',
+      ayuda: 'To book faster, use WhatsApp or call the front desk.',
+      nombre: 'Name',
+      correo: 'Email',
+      telefono: 'Phone (optional)',
+      mensaje: 'Message',
+      consentimiento: 'I accept the',
+      aviso: 'privacy notice',
+      enviar: 'Send message',
+      trampa: 'Do not fill in this field',
+    },
+  },
+  politicas: {
+    titulo: 'Hotel policies',
+    descripcion:
+      'Policies of Hotel Casa María Elena in Durango, Mexico: check-in and check-out times, pets, cancellation and invoicing.',
+    entrada: 'What is worth knowing before you book.',
+    lista: {
+      checkIn: {
+        titulo: 'Check-in',
+        texto: (hora: string) => `Rooms are available from ${hora}. The front desk is open 24 hours.`,
+      },
+      checkOut: {
+        titulo: 'Check-out',
+        texto: (hora: string) => `Rooms must be vacated by ${hora}.`,
+      },
+      mascotas: {
+        titulo: 'Pets',
+        no: 'Pets are not allowed.',
+        si: 'Pets are allowed.',
+      },
+      cancelacion: { titulo: 'Cancellation', pendiente: 'política de cancelación y anticipo' },
+      facturacion: {
+        titulo: 'Invoicing (factura)',
+        texto: 'The hotel issues Mexican tax invoices (facturas).',
+        pendiente: 'cómo y hasta cuándo solicitar la factura',
+      },
+    },
+    dudas: 'Have a question that is not answered here?',
+  },
+  privacidad: {
+    titulo: 'Privacy notice',
+    descripcion: 'Privacy notice of Hotel Casa María Elena: what personal data it receives and what it is used for.',
+    pendiente: 'revisión legal del aviso',
+  },
+  gracias: {
+    titulo: 'Message sent',
+    encabezado: 'We received your message',
+    texto: 'Thank you for writing. Your message reached the hotel’s inbox.',
+    urgente: 'If you need an answer today, call the front desk.',
+    volver: 'Back to home',
+  },
+  pie: {
+    hotel: 'Hotel',
+    restaurante: 'Restaurant',
+    sitio: 'On this site',
+    direccion: 'Address',
+    telefono: 'Phone',
+    correo: 'Email',
+    horario: 'Hours',
+    de: 'from',
+    a: 'to',
+    facebook: 'The hotel on Facebook',
+    derechos: 'All rights reserved.',
+  },
+  horarios: {
+    checkIn: 'Check-in from',
+    checkOut: 'Check-out until',
+  },
+};
+
+export const textos: Record<Idioma, typeof es> = { es, en };
+
+export function t(idioma: Idioma) {
+  return textos[idioma];
+}
+
+/** Hora en formato local: 15:00 en español, 3:00 PM en inglés. */
+export function hora(valor: string, idioma: Idioma): string {
+  if (idioma === 'es') return `${valor} h`;
+  const [h, m] = valor.split(':').map(Number);
+  const sufijo = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${sufijo}`;
+}

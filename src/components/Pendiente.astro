@@ -1,0 +1,14 @@
+---
+/**
+ * Etiqueta visible para un dato que el hotel todavía no confirma.
+ * Uso: <Pendiente que="WhatsApp del hotel" />
+ * Todos los pendientes están listados en PENDIENTES.md.
+ */
+interface Props {
+  que: string;
+}
+
+const { que } = Astro.props;
+---
+
+<mark class="pendiente">[POR CONFIRMAR: {que}]</mark>

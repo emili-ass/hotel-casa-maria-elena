@@ -1,0 +1,174 @@
+---
+import '../styles/global.css';
+import { Font, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import DatosEstructurados from '../components/DatosEstructurados.astro';
+import fotoFachada from '../assets/images/fachada.jpg';
+import Encabezado from '../components/Encabezado.astro';
+import Pie from '../components/Pie.astro';
+import WhatsAppFlotante from '../components/WhatsAppFlotante.astro';
+import { hotel, sitio, type Idioma } from '../data/negocio';
+import { ruta, idiomas, codigoIdioma, type ClavePagina } from '../i18n/rutas';
+import { t } from '../i18n/textos';
+import type { DestinoWhatsApp } from '../lib/whatsapp';
+
+interface Props {
+  idioma: Idioma;
+  pagina: ClavePagina;
+  titulo: string;
+  descripcion: string;
+  /** A quién escribe el botón flotante de WhatsApp. */
+  contacto?: DestinoWhatsApp;
+  /** Foto que aparece al compartir la página en redes o por WhatsApp. */
+  imagen?: ImageMetadata;
+  /** Páginas que Google no debe mostrar (por ejemplo, la de "mensaje enviado"). */
+  sinIndexar?: boolean;
+}
+
+const {
+  idioma,
+  pagina,
+  titulo,
+  descripcion,
+  contacto = 'hotel',
+  imagen = fotoFachada,
+  sinIndexar = false,
+} = Astro.props;
+const textos = t(idioma);
+
+const absoluta = (i: Idioma) => new URL(ruta(pagina, i), Astro.site).href;
+const tituloCompleto = pagina === 'inicio' ? titulo : `${titulo} | ${hotel.nombre}`;
+
+// Imagen para compartir: 1200 × 630, el tamaño que piden las redes.
+const compartir = await getImage({ src: imagen, width: 1200, height: 630, fit: 'cover', format: 'jpg' });
+const imagenCompartir = new URL(compartir.src, Astro.site).href;
+---
+
+<!doctype html>
+<html lang={codigoIdioma[idioma]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descripcion} />
+    {
+      sinIndexar ? (
+        <meta name="robots" content="noindex" />
+      ) : (
+        <>
+          <link rel="canonical" href={absoluta(idioma)} />
+          {idiomas.map((i) => (
+            <link rel="alternate" hreflang={i} href={absoluta(i)} />
+          ))}
+          <link rel="alternate" hreflang="x-default" href={absoluta('es')} />
+        </>
+      )
+    }
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={hotel.nombre} />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:url" content={absoluta(idioma)} />
+    <meta property="og:locale" content={idioma === 'es' ? 'es_MX' : 'en_US'} />
+    <meta property="og:locale:alternate" content={idioma === 'es' ? 'en_US' : 'es_MX'} />
+    <meta property="og:image" content={imagenCompartir} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#faf6ef" />
+
+    <Font cssVariable="--font-cormorant" preload={[{ weight: 600, style: 'normal' }]} />
+    <Font cssVariable="--font-figtree" preload={[{ weight: 400, style: 'normal' }]} />
+
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+
+    {!sinIndexar && <DatosEstructurados idioma={idioma} pagina={pagina} imagen={imagenCompartir} />}
+
+    {
+      sitio.googleAnalytics && (
+        <>
+          <script
+            is:inline
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${sitio.googleAnalytics}`}
+          />
+          <script is:inline define:vars={{ idMedicion: sitio.googleAnalytics }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            window.gtag = gtag;
+            gtag('js', new Date());
+            gtag('config', idMedicion);
+          </script>
+        </>
+      )
+    }
+    <slot name="head" />
+  </head>
+
+  <body class="bg-cal text-tinta antialiased">
+    <a
+      href="#contenido"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-tinta focus:px-5 focus:py-3 focus:font-semibold focus:text-cal"
+    >
+      {textos.saltarAlContenido}
+    </a>
+
+    <Encabezado idioma={idioma} pagina={pagina} />
+
+    <main id="contenido">
+      <slot />
+    </main>
+
+    <Pie idioma={idioma} />
+    <WhatsAppFlotante idioma={idioma} destino={contacto} />
+
+    <script>
+      // Medición de clics: cada botón importante lleva un nombre en data-evento
+      // (por ejemplo "whatsapp_hotel_reservar_portada"). Si hay una herramienta
+      // de medición instalada, se le avisa; si no, no pasa nada.
+      document.addEventListener('click', (evento) => {
+        const origen = evento.target instanceof Element ? evento.target.closest('[data-evento]') : null;
+        const nombre = origen?.getAttribute('data-evento');
+        if (!nombre) return;
+        const ventana = window as unknown as {
+          gtag?: (...args: unknown[]) => void;
+          plausible?: (nombre: string, opciones?: unknown) => void;
+        };
+        const detalle = { idioma: document.documentElement.lang, pagina: window.location.pathname };
+        ventana.gtag?.('event', nombre, detalle);
+        ventana.plausible?.(nombre, { props: detalle });
+      });
+
+      // Aparición discreta al hacer scroll para los elementos con data-revelar.
+      // Si el usuario pidió reducir movimiento, el CSS no los oculta y esto no hace falta.
+      const elementos = document.querySelectorAll('[data-revelar]');
+      const sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (elementos.length > 0 && !sinMovimiento && 'IntersectionObserver' in window) {
+        const observador = new IntersectionObserver(
+          (entradas) => {
+            for (const entrada of entradas) {
+              // También se muestra lo que quedó arriba de la pantalla
+              // (por ejemplo, al llegar a la página por un enlace interno).
+              if (entrada.isIntersecting || entrada.boundingClientRect.top < 0) {
+                entrada.target.classList.add('visible');
+                observador.unobserve(entrada.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -10% 0px' },
+        );
+        elementos.forEach((el) => observador.observe(el));
+      } else {
+        elementos.forEach((el) => el.classList.add('visible'));
+      }
+    </script>
+  </body>
+</html>

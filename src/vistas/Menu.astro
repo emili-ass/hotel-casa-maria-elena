@@ -1,0 +1,168 @@
+---
+import Base from '../layouts/Base.astro';
+import Boton from '../components/Boton.astro';
+import Icono from '../components/Icono.astro';
+import Pendiente from '../components/Pendiente.astro';
+import fotoPatio from '../assets/images/patio-2.jpg';
+import { restaurante, type Idioma } from '../data/negocio';
+import { menu, menuConfirmado } from '../data/menu';
+import { ruta } from '../i18n/rutas';
+import { t, hora } from '../i18n/textos';
+import { enlaceComoLlegar } from '../lib/whatsapp';
+
+interface Props {
+  idioma: Idioma;
+}
+
+const { idioma } = Astro.props;
+const textos = t(idioma);
+const m = textos.carta;
+
+const precio = new Intl.NumberFormat('es-MX', {
+  style: 'currency',
+  currency: 'MXN',
+  maximumFractionDigits: 0,
+});
+
+const horario = `${restaurante.horario.dias[idioma]}, ${hora(restaurante.horario.abre, idioma)} – ${hora(restaurante.horario.cierra, idioma)}`;
+---
+
+<Base
+  idioma={idioma}
+  pagina="menu"
+  titulo={m.titulo}
+  descripcion={m.descripcion}
+  contacto="restaurante"
+  imagen={fotoPatio}
+>
+  <section class="bg-patio text-cal">
+    <div class="contenedor pt-8 pb-10 lg:pt-12 lg:pb-14">
+      <p>
+        <a
+          href={ruta('restaurante', idioma)}
+          class="inline-flex min-h-11 items-center gap-1.5 font-titulo text-xl text-cal/85 italic underline decoration-cal/40 underline-offset-4 hover:text-cal hover:decoration-cal"
+        >
+          <Icono nombre="anterior" class="size-4" />
+          {m.volver}
+        </a>
+      </p>
+      <h1 class="mt-2 text-pagina">{m.encabezado}</h1>
+      <p class="mt-5 flex items-center gap-2.5 font-medium">
+        <Icono nombre="reloj" class="size-5 shrink-0" />
+        {horario}
+      </p>
+    </div>
+  </section>
+
+  <nav
+    class="sticky top-16 z-20 border-b border-cantera-300 bg-cal/95 backdrop-blur-sm lg:top-20 print:hidden"
+    aria-label={m.secciones}
+  >
+    <div class="contenedor">
+      <ul class="indice -mx-5 flex gap-6 overflow-x-auto px-5 font-medium whitespace-nowrap md:mx-0 md:px-0">
+        {
+          menu.map((seccion) => (
+            <li>
+              <a
+                href={`#${seccion.clave}`}
+                class="inline-flex min-h-12 items-center underline decoration-transparent underline-offset-8 transition-colors hover:decoration-cantera-300"
+              >
+                {seccion.nombre[idioma]}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </nav>
+
+  <div class="contenedor pt-10 pb-16 lg:pt-14 lg:pb-24">
+    <p class="max-w-[60ch] text-tinta-suave">
+      {m.moneda}{' '}
+      {!menuConfirmado && <Pendiente que={m.pendienteMenu} />}
+    </p>
+
+    {
+      menu.map((seccion) => (
+        <section
+          id={seccion.clave}
+          class="seccion-menu mt-12 grid gap-4 border-t border-cantera-300 pt-8 lg:mt-16 lg:grid-cols-12 lg:gap-8 lg:pt-10"
+          aria-labelledby={`menu-${seccion.clave}`}
+        >
+          <h2 id={`menu-${seccion.clave}`} class="text-seccion font-medium italic lg:col-span-4">
+            {seccion.nombre[idioma]}
+          </h2>
+
+          <div class="lg:col-span-7 lg:col-start-6">
+            {seccion.platillos.length > 0 ? (
+              <ul>
+                {seccion.platillos.map((platillo) => (
+                  <li class="border-b border-cantera-100 py-4 first:pt-0">
+                    <div class="flex items-baseline gap-3">
+                      <h3 class="font-texto text-[1.1rem] font-semibold tracking-normal">
+                        {platillo.nombre[idioma]}
+                      </h3>
+                      <span class="guia flex-1" aria-hidden="true"></span>
+                      <p class="font-semibold whitespace-nowrap tabular-nums">
+                        {platillo.precio !== null ? (
+                          precio.format(platillo.precio)
+                        ) : (
+                          <Pendiente que={m.pendientePrecio} />
+                        )}
+                      </p>
+                    </div>
+                    {platillo.descripcion && (
+                      <p class="mt-1 max-w-[52ch] text-tinta-suave">{platillo.descripcion[idioma]}</p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>
+                <Pendiente que={m.pendienteSeccion} />
+              </p>
+            )}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+
+  <section class="bg-cantera-100">
+    <div class="contenedor flex flex-col gap-6 py-14 lg:flex-row lg:items-center lg:justify-between lg:py-16">
+      <p class="max-w-[40ch] font-titulo text-subtitulo font-semibold">{m.cierre}</p>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <Boton href={`tel:${restaurante.telefono.enlace}`} evento="llamada_restaurante_menu">
+          <Icono nombre="telefono" />
+          {textos.restaurante.llamar(restaurante.telefono.visible)}
+        </Boton>
+        <Boton href={enlaceComoLlegar()} variante="secundario" externo evento="como_llegar_menu">
+          <Icono nombre="pin" />
+          {textos.acciones.comoLlegar}
+        </Boton>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .indice {
+    scrollbar-width: none;
+  }
+
+  .indice::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Deja libre el encabezado y el índice fijos al saltar a una sección. */
+  .seccion-menu {
+    scroll-margin-top: 8.5rem;
+  }
+
+  /* Línea de puntos entre el platillo y su precio, como en una carta impresa. */
+  .guia {
+    min-width: 1.5rem;
+    border-bottom: 2px dotted var(--color-cantera-300);
+    transform: translateY(-0.3em);
+  }
+</style>

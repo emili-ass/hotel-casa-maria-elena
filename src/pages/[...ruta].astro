@@ -1,0 +1,51 @@
+---
+/**
+ * Genera TODAS las páginas del sitio, en español y en inglés,
+ * a partir de la lista de rutas de src/i18n/rutas.ts.
+ * Cada página se dibuja con su vista de src/vistas/.
+ */
+import type { Idioma } from '../data/negocio';
+import { rutas, clavesPagina, idiomas, type ClavePagina } from '../i18n/rutas';
+import Inicio from '../vistas/Inicio.astro';
+import Habitaciones from '../vistas/Habitaciones.astro';
+import Restaurante from '../vistas/Restaurante.astro';
+import Menu from '../vistas/Menu.astro';
+import Galeria from '../vistas/Galeria.astro';
+import Ubicacion from '../vistas/Ubicacion.astro';
+import Politicas from '../vistas/Politicas.astro';
+import Privacidad from '../vistas/Privacidad.astro';
+import Gracias from '../vistas/Gracias.astro';
+
+export function getStaticPaths() {
+  return idiomas.flatMap((idioma) =>
+    clavesPagina.map((pagina) => ({
+      params: { ruta: rutas[pagina][idioma].replace(/^\/|\/$/g, '') || undefined },
+      props: { pagina, idioma },
+    })),
+  );
+}
+
+interface Props {
+  pagina: ClavePagina;
+  idioma: Idioma;
+}
+
+const { pagina, idioma } = Astro.props;
+
+// Vista que dibuja cada página.
+const vistas: Record<ClavePagina, typeof Inicio> = {
+  inicio: Inicio,
+  habitaciones: Habitaciones,
+  restaurante: Restaurante,
+  menu: Menu,
+  galeria: Galeria,
+  ubicacion: Ubicacion,
+  politicas: Politicas,
+  privacidad: Privacidad,
+  gracias: Gracias,
+};
+
+const Vista = vistas[pagina];
+---
+
+<Vista idioma={idioma} />

@@ -1,0 +1,33 @@
+---
+/** Página que se muestra después de enviar el formulario de contacto. */
+import Base from '../layouts/Base.astro';
+import Boton from '../components/Boton.astro';
+import Icono from '../components/Icono.astro';
+import { hotel, type Idioma } from '../data/negocio';
+import { ruta } from '../i18n/rutas';
+import { t } from '../i18n/textos';
+
+interface Props {
+  idioma: Idioma;
+}
+
+const { idioma } = Astro.props;
+const g = t(idioma).gracias;
+---
+
+<Base idioma={idioma} pagina="gracias" titulo={g.titulo} descripcion={g.texto} sinIndexar>
+  <section class="contenedor py-20 lg:py-32">
+    <h1 class="text-pagina">{g.encabezado}</h1>
+    <p class="mt-5 max-w-[46ch] text-entrada text-tinta-suave">{g.texto}</p>
+    <p class="mt-2 max-w-[46ch] text-tinta-suave">{g.urgente}</p>
+    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+      <Boton href={`tel:${hotel.telefono.enlace}`} evento="llamada_hotel_gracias">
+        <Icono nombre="telefono" />
+        {hotel.telefono.visible}
+      </Boton>
+      <Boton href={ruta('inicio', idioma)} variante="secundario">
+        {g.volver}
+      </Boton>
+    </div>
+  </section>
+</Base>

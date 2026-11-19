@@ -1,0 +1,117 @@
+---
+/**
+ * DATOS ESTRUCTURADOS (schema.org)
+ * Le dicen a Google qué es este negocio: un hotel y, dentro de él, un
+ * restaurante. Se arman solos con los datos de src/data/negocio.ts.
+ *
+ * A propósito NO incluyen reseñas ni calificación promedio: Google no
+ * muestra estrellas cuando un negocio marca reseñas sobre sí mismo en su
+ * propio sitio, y sus directrices lo desaconsejan.
+ * Tampoco incluyen datos que el hotel aún no confirma (precios, número de
+ * habitaciones, coordenadas).
+ */
+import { hotel, restaurante, sitio, type Idioma } from '../data/negocio';
+import { menu } from '../data/menu';
+import { ruta, type ClavePagina } from '../i18n/rutas';
+
+interface Props {
+  idioma: Idioma;
+  pagina: ClavePagina;
+  /** Dirección completa de la imagen principal de la página. */
+  imagen: string;
+}
+
+const { idioma, pagina, imagen } = Astro.props;
+
+const absoluta = (clave: ClavePagina) => new URL(ruta(clave, idioma), Astro.site).href;
+const idHotel = `${sitio.url}/#hotel`;
+const idRestaurante = `${sitio.url}/#restaurante`;
+const d = hotel.direccion;
+
+const direccion = {
+  '@type': 'PostalAddress',
+  streetAddress: `${d.calle}, ${d.colonia}`,
+  addressLocality: d.ciudad,
+  addressRegion: d.estado,
+  postalCode: d.codigoPostal,
+  addressCountry: d.codigoPais,
+};
+
+const mapa = (busqueda: string) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(busqueda)}`;
+
+const nodoHotel = {
+  '@type': 'Hotel',
+  '@id': idHotel,
+  name: hotel.nombre,
+  description: hotel.estilo[idioma],
+  slogan: hotel.lema[idioma],
+  url: absoluta('inicio'),
+  image: imagen,
+  telephone: hotel.telefono.enlace,
+  email: hotel.correo,
+  address: direccion,
+  hasMap: hotel.perfilGoogle ?? mapa(hotel.busquedaMapa),
+  checkinTime: hotel.checkIn,
+  checkoutTime: hotel.checkOut,
+  petsAllowed: hotel.aceptaMascotas,
+  amenityFeature: hotel.servicios.map((servicio) => ({
+    '@type': 'LocationFeatureSpecification',
+    name: servicio[idioma],
+    value: true,
+  })),
+  sameAs: [hotel.facebook, hotel.perfilGoogle].filter(Boolean),
+  containsPlace: { '@id': idRestaurante },
+};
+
+// En la página del menú se detallan secciones y platillos (con precio solo si ya se conoce).
+const menuDetallado = {
+  '@type': 'Menu',
+  url: absoluta('menu'),
+  inLanguage: idioma,
+  hasMenuSection: menu
+    .filter((seccion) => seccion.platillos.length > 0)
+    .map((seccion) => ({
+      '@type': 'MenuSection',
+      name: seccion.nombre[idioma],
+      hasMenuItem: seccion.platillos.map((platillo) => ({
+        '@type': 'MenuItem',
+        name: platillo.nombre[idioma],
+        ...(platillo.descripcion ? { description: platillo.descripcion[idioma] } : {}),
+        ...(platillo.precio !== null
+          ? { offers: { '@type': 'Offer', price: platillo.precio, priceCurrency: 'MXN' } }
+          : {}),
+      })),
+    })),
+};
+
+const nodoRestaurante = {
+  '@type': 'Restaurant',
+  '@id': idRestaurante,
+  name: restaurante.nombre,
+  description: restaurante.descripcion[idioma],
+  url: absoluta('restaurante'),
+  image: imagen,
+  telephone: restaurante.telefono.enlace,
+  address: direccion,
+  hasMap: restaurante.calificacionGoogle.perfil ?? mapa(restaurante.busquedaMapa),
+  servesCuisine: idioma === 'es' ? 'Mexicana' : 'Mexican',
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: restaurante.horario.diasAbierto,
+      opens: restaurante.horario.abre,
+      closes: restaurante.horario.cierra,
+    },
+  ],
+  hasMenu: pagina === 'menu' ? menuDetallado : absoluta('menu'),
+  containedInPlace: { '@id': idHotel },
+};
+
+const datos = {
+  '@context': 'https://schema.org',
+  '@graph': [nodoHotel, nodoRestaurante],
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(datos)} />

@@ -1,0 +1,304 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Boton from '../components/Boton.astro';
+import Icono from '../components/Icono.astro';
+import Mapa from '../components/Mapa.astro';
+import Resenas from '../components/Resenas.astro';
+import fotoPortada from '../assets/images/patio-3.jpg';
+import fotoPatio2 from '../assets/images/patio-2.jpg';
+import fotoPatio4 from '../assets/images/patio-4.jpg';
+import fotoSalon from '../assets/images/restaurante-1.jpg';
+import fotoMesa from '../assets/images/restaurante-2.jpg';
+import fotoChilaquiles from '../assets/images/chilaquiles.jpg';
+import fotoHuevos from '../assets/images/huevos-rancheros.jpg';
+import fotoCapuchino from '../assets/images/capuchino.jpg';
+import fotoPan from '../assets/images/panaderia.jpg';
+import { hotel, restaurante, type Idioma } from '../data/negocio';
+import { ruta } from '../i18n/rutas';
+import { t, hora } from '../i18n/textos';
+import { enlaceWhatsApp, eventoWhatsApp, enlaceComoLlegar } from '../lib/whatsapp';
+import { enFrase } from '../lib/texto';
+
+interface Props {
+  idioma: Idioma;
+}
+
+const { idioma } = Astro.props;
+const textos = t(idioma);
+const r = textos.restaurante;
+const d = hotel.direccion;
+
+const horario = `${restaurante.horario.dias[idioma]}, ${hora(restaurante.horario.abre, idioma)} – ${hora(restaurante.horario.cierra, idioma)}`;
+
+const fotosFavoritos = {
+  chilaquiles: fotoChilaquiles,
+  'huevos-rancheros': fotoHuevos,
+  capuchino: fotoCapuchino,
+  panaderia: fotoPan,
+};
+
+const navegacion = [
+  { href: ruta('menu', idioma), texto: textos.paginas.menu },
+  { href: '#favoritos', texto: r.navegacion.favoritos },
+  { href: '#patio', texto: r.navegacion.patio },
+  { href: '#resenas', texto: r.navegacion.resenas },
+  { href: '#visita', texto: r.navegacion.visita },
+];
+
+// Lo que destacan las reseñas además de la comida y el patio.
+const tambien = restaurante.destacados
+  .filter((x) => ['ambiente', 'personal'].includes(x.clave))
+  .map((x) => x[idioma]);
+---
+
+<Base
+  idioma={idioma}
+  pagina="restaurante"
+  titulo={r.titulo}
+  descripcion={r.descripcion}
+  contacto="restaurante"
+  imagen={fotoPatio2}
+>
+  <section class="bg-patio text-cal">
+    <div class="contenedor">
+      <nav class="-mx-5 overflow-x-auto px-5 md:mx-0 md:px-0" aria-label={r.secciones}>
+        <ul class="flex gap-6 border-b border-cal/20 text-[0.95rem] font-medium whitespace-nowrap">
+          {
+            navegacion.map((enlace) => (
+              <li>
+                <a
+                  href={enlace.href}
+                  class="inline-flex min-h-12 items-center text-cal/85 underline decoration-transparent underline-offset-8 transition-colors hover:text-cal hover:decoration-cal/60"
+                >
+                  {enlace.texto}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="grid gap-10 pt-10 pb-14 lg:grid-cols-12 lg:items-end lg:gap-8 lg:pt-14 lg:pb-20">
+        <div class="lg:col-span-6 lg:pb-10">
+          <h1>
+            <span class="block font-texto text-base font-medium tracking-normal text-cal/80">
+              {r.lugar}
+            </span>
+            <span class="mt-3 block text-portada font-medium italic">{restaurante.nombre}</span>
+          </h1>
+          <p class="mt-6 max-w-[36ch] text-entrada text-cal/85">{r.entrada}</p>
+
+          <p class="mt-6 flex items-center gap-2.5 font-medium">
+            <Icono nombre="reloj" class="size-5 shrink-0" />
+            {horario}
+          </p>
+
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Boton href={ruta('menu', idioma)} variante="claro">
+              {textos.acciones.verMenu}
+            </Boton>
+            {
+              restaurante.whatsapp ? (
+                <Boton
+                  href={enlaceWhatsApp({ intencion: 'restaurante', idioma, destino: 'restaurante' })}
+                  variante="contornoClaro"
+                  evento={eventoWhatsApp({ intencion: 'restaurante', destino: 'restaurante' }) + '_portada'}
+                  externo
+                >
+                  <Icono nombre="whatsapp" />
+                  {textos.acciones.whatsapp}
+                </Boton>
+              ) : (
+                <Boton
+                  href={`tel:${restaurante.telefono.enlace}`}
+                  variante="contornoClaro"
+                  evento="llamada_restaurante_portada"
+                >
+                  <Icono nombre="telefono" />
+                  {r.llamar(restaurante.telefono.visible)}
+                </Boton>
+              )
+            }
+          </div>
+          <p class="mt-4 max-w-[42ch] text-sm text-cal/80">{r.abierto}</p>
+        </div>
+
+        <div class="mx-auto w-full max-w-md lg:col-span-5 lg:col-start-8 lg:max-w-none">
+          <div class="marco">
+            <Picture
+              src={fotoPortada}
+              alt={r.fotoPortada}
+              formats={['avif', 'webp']}
+              widths={[480, 768, 1080, 1440]}
+              sizes="(min-width: 64rem) 38vw, (min-width: 30rem) 28rem, 100vw"
+              loading="eager"
+              fetchpriority="high"
+              class="aspect-[4/5] w-full object-cover"
+              pictureAttributes={{ class: 'arco block' }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="favoritos" class="contenedor scroll-mt-20 py-16 lg:py-24">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <h2 class="text-seccion">{r.favoritosTitulo}</h2>
+        <p class="mt-4 max-w-[48ch] text-tinta-suave">{r.favoritosTexto}</p>
+      </div>
+      <Boton href={ruta('menu', idioma)} variante="secundario" class="self-start lg:self-auto">
+        {textos.acciones.verMenu}
+      </Boton>
+    </div>
+
+    <ul class="mt-10 grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4 lg:gap-x-6">
+      {
+        r.favoritos.map((favorito) => (
+          <li>
+            <Picture
+              src={fotosFavoritos[favorito.clave as keyof typeof fotosFavoritos]}
+              alt={favorito.alt}
+              formats={['avif', 'webp']}
+              widths={[240, 400, 640]}
+              sizes="(min-width: 64rem) 22vw, 45vw"
+              loading="lazy"
+              class="aspect-square w-full object-cover"
+            />
+            <p class="mt-3 font-titulo text-2xl leading-tight font-semibold italic">
+              {favorito.nombre}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section id="patio" class="scroll-mt-20 bg-cantera-100">
+    <div class="contenedor py-16 lg:py-24">
+      <div class="max-w-xl">
+        <h2 class="text-seccion">{r.patioTitulo}</h2>
+        <p class="mt-4 text-entrada text-tinta-suave">{r.patioTexto}</p>
+      </div>
+
+      <div class="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-12 lg:gap-6">
+        <Picture
+          src={fotoPatio2}
+          alt={r.fotosPatio['patio-2']}
+          formats={['avif', 'webp']}
+          widths={[480, 768, 1080, 1440]}
+          sizes="(min-width: 64rem) 62vw, 100vw"
+          loading="lazy"
+          class="h-full w-full object-cover"
+          pictureAttributes={{ class: 'col-span-2 block aspect-[4/3] lg:col-span-8' }}
+        />
+        <Picture
+          src={fotoMesa}
+          alt={r.fotosPatio['restaurante-2']}
+          formats={['avif', 'webp']}
+          widths={[360, 540, 800]}
+          sizes="(min-width: 64rem) 30vw, 50vw"
+          loading="lazy"
+          class="h-full w-full object-cover lg:absolute lg:inset-0"
+          pictureAttributes={{ class: 'relative block aspect-[4/5] lg:col-span-4 lg:aspect-auto' }}
+        />
+        <Picture
+          src={fotoPatio4}
+          alt={r.fotosPatio['patio-4']}
+          formats={['avif', 'webp']}
+          widths={[360, 540, 800, 1080]}
+          sizes="(min-width: 64rem) 46vw, 50vw"
+          loading="lazy"
+          class="h-full w-full object-cover"
+          pictureAttributes={{ class: 'block aspect-[4/5] lg:col-span-6 lg:aspect-[4/3]' }}
+        />
+        <Picture
+          src={fotoSalon}
+          alt={r.fotosPatio['restaurante-1']}
+          formats={['avif', 'webp']}
+          widths={[480, 768, 1080]}
+          sizes="(min-width: 64rem) 46vw, 100vw"
+          loading="lazy"
+          class="h-full w-full object-cover"
+          pictureAttributes={{ class: 'col-span-2 block aspect-[4/3] lg:col-span-6' }}
+        />
+      </div>
+    </div>
+  </section>
+
+  <Resenas idioma={idioma} class="py-16 lg:py-24" />
+
+  <section id="visita" class="scroll-mt-20 bg-patio text-cal">
+    <div class="contenedor grid gap-10 py-16 lg:grid-cols-12 lg:gap-8 lg:py-24">
+      <div class="lg:col-span-5">
+        <h2 class="text-seccion">{r.visitaTitulo}</h2>
+
+        <dl class="mt-8 border-t border-cal/25">
+          <div class="border-b border-cal/25 py-4">
+            <dt class="text-cal/80">{r.horario}</dt>
+            <dd class="mt-0.5 font-medium">{horario}</dd>
+          </div>
+          <div class="border-b border-cal/25 py-4">
+            <dt class="text-cal/80">{r.direccion}</dt>
+            <dd class="mt-0.5 font-medium">
+              {r.dentroDe}<br />
+              {d.calle}, {d.colonia}<br />
+              {d.ciudad}, {d.estadoCorto}
+            </dd>
+          </div>
+          <div class="border-b border-cal/25 py-4">
+            <dt class="text-cal/80">{r.telefono}</dt>
+            <dd class="mt-0.5 font-medium">
+              <a
+                href={`tel:${restaurante.telefono.enlace}`}
+                class="underline decoration-cal/40 underline-offset-4 hover:decoration-cal"
+                data-evento="llamada_restaurante_visita"
+              >
+                {restaurante.telefono.visible}
+              </a>
+            </dd>
+          </div>
+          <div class="border-b border-cal/25 py-4">
+            <dt class="text-cal/80">{r.tambien}</dt>
+            <dd class="mt-0.5 font-medium">{enFrase(tambien)}</dd>
+          </div>
+        </dl>
+
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Boton href={enlaceComoLlegar()} variante="claro" externo evento="como_llegar_restaurante">
+            <Icono nombre="pin" />
+            {textos.acciones.comoLlegar}
+          </Boton>
+          <Boton href={ruta('menu', idioma)} variante="contornoClaro">
+            {textos.acciones.verMenu}
+          </Boton>
+        </div>
+      </div>
+
+      <Mapa
+        idioma={idioma}
+        titulo={r.tituloMapa}
+        class="aspect-[4/3] lg:col-span-6 lg:col-start-7 lg:aspect-auto lg:min-h-[28rem]"
+      />
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Marco de cantera alrededor de la foto en arco, en versión clara. */
+  .marco {
+    position: relative;
+    padding: 0.75rem;
+  }
+
+  .marco::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgb(250 246 239 / 0.45);
+    border-radius: 999px 999px 0 0;
+    pointer-events: none;
+  }
+</style>

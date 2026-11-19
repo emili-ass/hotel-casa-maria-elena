@@ -1,0 +1,505 @@
+---
+/**
+ * CARRUSEL DE RESEÑAS
+ * Muestra solo las reseñas de 5 estrellas de src/data/resenas.ts.
+ *  - completa: todas las reseñas, con pestañas Todas / Hotel / Restaurante.
+ *  - corta: las 3 primeras, sin pestañas (para la página de Inicio).
+ *
+ * Avanza solo cada 5.5 segundos. Se detiene al pasar el mouse, al tocarlo,
+ * al navegarlo con teclado o con el botón "Pausar". Si la persona pidió
+ * reducir el movimiento en su sistema, no avanza solo.
+ * Sin JavaScript sigue siendo una fila que se desliza con el dedo.
+ */
+import Boton from './Boton.astro';
+import Icono from './Icono.astro';
+import Pendiente from './Pendiente.astro';
+import { restaurante, type Idioma } from '../data/negocio';
+import { resenas, nombresFuente } from '../data/resenas';
+import { codigoIdioma } from '../i18n/rutas';
+import { t } from '../i18n/textos';
+import { enlaceResenasGoogle } from '../lib/whatsapp';
+
+interface Props {
+  idioma: Idioma;
+  variante?: 'completa' | 'corta';
+  class?: string;
+}
+
+const { idioma, variante = 'completa', class: clase = '' } = Astro.props;
+const r = t(idioma).resenas;
+const google = restaurante.calificacionGoogle;
+
+// 1) Solo 5 estrellas. 2) Primero las escritas en el idioma de la página.
+const cincoEstrellas = resenas.filter((resena) => resena.calificacion === 5);
+const ordenadas = [
+  ...cincoEstrellas.filter((resena) => resena.idioma === idioma),
+  ...cincoEstrellas.filter((resena) => resena.idioma !== idioma),
+];
+const lista = variante === 'corta' ? ordenadas.slice(0, 3) : ordenadas;
+
+const categorias = (['hotel', 'restaurante'] as const).filter((categoria) =>
+  lista.some((resena) => resena.refiere === categoria),
+);
+const conPestanas = variante === 'completa' && categorias.length > 1;
+const filtros = ['todas', ...categorias] as const;
+
+const id = `resenas-${variante}`;
+
+const fecha = (valor: string) => {
+  const [anio, mes, dia] = valor.split('-').map(Number);
+  return new Intl.DateTimeFormat(codigoIdioma[idioma], {
+    year: 'numeric',
+    month: 'long',
+    ...(dia ? { day: 'numeric' } : {}),
+  }).format(new Date(anio, (mes || 1) - 1, dia || 1));
+};
+---
+
+{
+  lista.length > 0 && (
+    <section
+      id="resenas"
+      class:list={['resenas scroll-mt-20', clase]}
+      aria-labelledby={`${id}-titulo`}
+      data-resenas
+      data-intervalo="5500"
+      data-posicion={r.posicion}
+    >
+      <div class="contenedor">
+        <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 id={`${id}-titulo`} class="text-seccion">
+              {r.titulo}
+            </h2>
+            <p class="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+              <span class="sr-only">{r.calificacion(restaurante.nombre)}: </span>
+              <span class="font-titulo text-[2.5rem] leading-none font-semibold">{google.promedio}</span>
+              <Icono nombre="estrella" class="size-6 text-terracota" />
+              <span class="sr-only">{r.deCinco}, </span>
+              <span class="text-tinta-suave">
+                {restaurante.nombre}: {r.enGoogle(google.total[idioma])}
+              </span>
+            </p>
+          </div>
+          <Boton
+            href={enlaceResenasGoogle()}
+            variante="secundario"
+            externo
+            evento="resenas_ver_todas_google"
+            class="self-start md:self-auto"
+          >
+            <Icono nombre="google" class="size-4" />
+            {r.verTodas}
+          </Boton>
+        </div>
+
+        {conPestanas && (
+          <div class="mt-8 flex flex-wrap gap-2" role="group" aria-label={r.filtrar}>
+            {filtros.map((filtro) => (
+              <button
+                type="button"
+                class="pestana min-h-11 rounded-full border border-tinta/35 px-5 font-medium transition-colors duration-200 hover:border-tinta"
+                data-filtro={filtro}
+                aria-pressed={filtro === 'todas' ? 'true' : 'false'}
+              >
+                {r.filtros[filtro]}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div
+          class="carrusel mt-8"
+          role="region"
+          aria-roledescription={r.carrusel}
+          aria-label={r.titulo}
+          tabindex="0"
+          data-carrusel
+        >
+          <ul
+            class="pista -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto px-5 py-1 md:mx-0 md:scroll-px-0 md:gap-6 md:px-0"
+            data-pista
+          >
+            {lista.map((resena) => (
+              <li
+                class="w-[86%] shrink-0 snap-start md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
+                data-refiere={resena.refiere}
+              >
+                <article class="flex h-full flex-col border border-cantera-300 bg-cal p-6">
+                  <div class="flex items-center justify-between gap-4">
+                    <p class="flex gap-0.5 text-terracota" role="img" aria-label={r.estrellas}>
+                      {[1, 2, 3, 4, 5].map(() => (
+                        <Icono nombre="estrella" class="size-5" />
+                      ))}
+                    </p>
+                    <p class="text-sm text-tinta-suave">{r.sobre[resena.refiere]}</p>
+                  </div>
+
+                  {resena.pendiente && (
+                    <p class="mt-3">
+                      <Pendiente que={r.pendiente} />
+                    </p>
+                  )}
+
+                  <blockquote class="mt-4">
+                    <p
+                      class="texto"
+                      lang={resena.idioma !== idioma ? codigoIdioma[resena.idioma] : undefined}
+                      data-texto
+                    >
+                      {resena.texto}
+                    </p>
+                  </blockquote>
+                  <button
+                    type="button"
+                    class="mt-2 min-h-11 self-start font-semibold text-barro underline underline-offset-4 hover:text-tinta"
+                    aria-expanded="false"
+                    data-leer-mas
+                    data-mas={r.leerMas}
+                    data-menos={r.leerMenos}
+                    hidden
+                  >
+                    {r.leerMas}
+                  </button>
+
+                  <footer class="mt-auto flex items-end justify-between gap-4 pt-5">
+                    <div>
+                      <p class="font-semibold">{resena.nombre}</p>
+                      {resena.fecha && (
+                        <p class="text-sm text-tinta-suave">
+                          <time datetime={resena.fecha}>{fecha(resena.fecha)}</time>
+                        </p>
+                      )}
+                    </div>
+                    <p class="flex items-center gap-1.5 text-sm text-tinta-suave">
+                      {resena.fuente === 'google' && <Icono nombre="google" class="size-3.5" />}
+                      {nombresFuente[resena.fuente]}
+                    </p>
+                  </footer>
+                </article>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="mt-5 flex items-center justify-between gap-4" data-controles hidden>
+          <button
+            type="button"
+            class="inline-flex min-h-11 items-center gap-2 rounded-full pr-3 font-medium text-tinta-suave hover:text-tinta"
+            data-pausa
+            data-pausar={r.pausar}
+            data-reanudar={r.reanudar}
+            data-pausar-largo={r.pausarLargo}
+            data-reanudar-largo={r.reanudarLargo}
+            aria-label={r.pausarLargo}
+            hidden
+          >
+            <span class="icono-pausa"><Icono nombre="pausa" class="size-5" /></span>
+            <span class="icono-reproducir"><Icono nombre="reproducir" class="size-5" /></span>
+            <span data-pausa-texto>{r.pausar}</span>
+          </button>
+
+          <div class="ml-auto flex items-center gap-3">
+            <p class="text-sm text-tinta-suave tabular-nums" aria-hidden="true" data-contador></p>
+            <button
+              type="button"
+              class="flecha flex size-11 items-center justify-center rounded-full border border-tinta/35 transition-colors duration-200 hover:border-tinta hover:bg-tinta/5"
+              aria-label={r.anterior}
+              data-anterior
+            >
+              <Icono nombre="anterior" />
+            </button>
+            <button
+              type="button"
+              class="flecha flex size-11 items-center justify-center rounded-full border border-tinta/35 transition-colors duration-200 hover:border-tinta hover:bg-tinta/5"
+              aria-label={r.siguiente}
+              data-siguiente
+            >
+              <Icono nombre="siguiente" />
+            </button>
+          </div>
+        </div>
+
+        <p class="sr-only" aria-live="polite" data-estado></p>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .pista {
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .pista::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pestana[aria-pressed='true'] {
+    border-color: var(--color-tinta);
+    background-color: var(--color-tinta);
+    color: var(--color-cal);
+  }
+
+  /* El texto se corta a 4 líneas solo si hay JavaScript para el botón "Leer más". */
+  :global(.js) .texto:not(.abierta) {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    overflow: hidden;
+  }
+
+  .icono-reproducir,
+  [data-pausa][data-pausado] .icono-pausa {
+    display: none;
+  }
+
+  [data-pausa][data-pausado] .icono-reproducir {
+    display: inline;
+  }
+</style>
+
+<script>
+  function iniciarResenas(raiz: HTMLElement) {
+    const carrusel = raiz.querySelector<HTMLElement>('[data-carrusel]');
+    const pista = raiz.querySelector<HTMLElement>('[data-pista]');
+    if (!carrusel || !pista) return;
+
+    const tarjetas = Array.from(pista.children) as HTMLElement[];
+    const controles = raiz.querySelector<HTMLElement>('[data-controles]');
+    const botonAnterior = raiz.querySelector<HTMLButtonElement>('[data-anterior]');
+    const botonSiguiente = raiz.querySelector<HTMLButtonElement>('[data-siguiente]');
+    const botonPausa = raiz.querySelector<HTMLButtonElement>('[data-pausa]');
+    const textoPausa = raiz.querySelector<HTMLElement>('[data-pausa-texto]');
+    const contador = raiz.querySelector<HTMLElement>('[data-contador]');
+    const estado = raiz.querySelector<HTMLElement>('[data-estado]');
+    const pestanas = Array.from(raiz.querySelectorAll<HTMLButtonElement>('[data-filtro]'));
+
+    const intervalo = Number(raiz.dataset.intervalo) || 5500;
+    const plantillaPosicion = raiz.dataset.posicion ?? '{n} / {total}';
+    const sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const visibles = () => tarjetas.filter((tarjeta) => !tarjeta.hidden);
+    const maximo = () => pista.scrollWidth - pista.clientWidth;
+    const seDesplaza = () => maximo() > 4;
+
+    /** Posición de la tarjeta que está al inicio de la fila. */
+    const indiceActual = () => {
+      const lista = visibles();
+      if (lista.length === 0) return 0;
+      const origen = lista[0].offsetLeft;
+      let mejor = 0;
+      let distancia = Infinity;
+      lista.forEach((tarjeta, i) => {
+        const d = Math.abs(tarjeta.offsetLeft - origen - pista.scrollLeft);
+        if (d < distancia) {
+          distancia = d;
+          mejor = i;
+        }
+      });
+      return mejor;
+    };
+
+    const posicion = (n: number, total: number) =>
+      plantillaPosicion.replace('{n}', String(n)).replace('{total}', String(total));
+
+    const irA = (indice: number, anunciar: boolean) => {
+      const lista = visibles();
+      if (lista.length === 0) return;
+      const i = (indice + lista.length) % lista.length;
+      pista.scrollTo({
+        left: lista[i].offsetLeft - lista[0].offsetLeft,
+        behavior: sinMovimiento.matches ? 'auto' : 'smooth',
+      });
+      // Solo se anuncia cuando la persona navega; el avance automático calla.
+      if (anunciar && estado) estado.textContent = posicion(i + 1, lista.length);
+    };
+
+    const avanzar = (direccion: 1 | -1, anunciar: boolean) => {
+      const lista = visibles();
+      if (direccion === 1 && pista.scrollLeft >= maximo() - 4) return irA(0, anunciar);
+      if (direccion === -1 && pista.scrollLeft <= 4) return irA(lista.length - 1, anunciar);
+      irA(indiceActual() + direccion, anunciar);
+    };
+
+    /* ---------- Avance automático ---------- */
+    let temporizador: number | undefined;
+    let pausadoPorPersona = false;
+    let encima = false;
+    let conFoco = false;
+    let tocado = false;
+    let enPantalla = false;
+    let esperaToque: number | undefined;
+
+    const puedeAvanzar = () =>
+      !sinMovimiento.matches &&
+      !pausadoPorPersona &&
+      !encima &&
+      !conFoco &&
+      !tocado &&
+      enPantalla &&
+      !document.hidden &&
+      seDesplaza();
+
+    const programar = () => {
+      window.clearTimeout(temporizador);
+      if (!puedeAvanzar()) return;
+      temporizador = window.setTimeout(() => {
+        if (puedeAvanzar()) avanzar(1, false);
+        programar();
+      }, intervalo);
+    };
+
+    raiz.addEventListener('mouseenter', () => {
+      encima = true;
+      programar();
+    });
+    raiz.addEventListener('mouseleave', () => {
+      encima = false;
+      programar();
+    });
+    raiz.addEventListener('focusin', () => {
+      conFoco = true;
+      programar();
+    });
+    raiz.addEventListener('focusout', (evento) => {
+      if (evento.relatedTarget instanceof Node && raiz.contains(evento.relatedTarget)) return;
+      conFoco = false;
+      programar();
+    });
+    // Al tocar la tarjeta en el celular se detiene; retoma tras 10 s sin tocar.
+    raiz.addEventListener(
+      'pointerdown',
+      (evento) => {
+        if (evento.pointerType === 'mouse') return;
+        tocado = true;
+        window.clearTimeout(esperaToque);
+        esperaToque = window.setTimeout(() => {
+          tocado = false;
+          programar();
+        }, 10000);
+        programar();
+      },
+      { passive: true },
+    );
+    document.addEventListener('visibilitychange', programar);
+    sinMovimiento.addEventListener('change', () => {
+      actualizarControles();
+      programar();
+    });
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(
+        ([entrada]) => {
+          enPantalla = entrada.isIntersecting;
+          programar();
+        },
+        { threshold: 0.4 },
+      ).observe(carrusel);
+    } else {
+      enPantalla = true;
+    }
+
+    /* ---------- Controles ---------- */
+    const actualizarContador = () => {
+      const lista = visibles();
+      if (contador) contador.textContent = `${indiceActual() + 1} / ${lista.length}`;
+    };
+
+    const actualizarControles = () => {
+      if (controles) controles.hidden = !seDesplaza();
+      if (botonPausa) botonPausa.hidden = sinMovimiento.matches;
+      actualizarContador();
+    };
+
+    botonAnterior?.addEventListener('click', () => avanzar(-1, true));
+    botonSiguiente?.addEventListener('click', () => avanzar(1, true));
+
+    botonPausa?.addEventListener('click', () => {
+      pausadoPorPersona = !pausadoPorPersona;
+      botonPausa.toggleAttribute('data-pausado', pausadoPorPersona);
+      const d = botonPausa.dataset;
+      botonPausa.setAttribute(
+        'aria-label',
+        (pausadoPorPersona ? d.reanudarLargo : d.pausarLargo) ?? '',
+      );
+      if (textoPausa) textoPausa.textContent = (pausadoPorPersona ? d.reanudar : d.pausar) ?? '';
+      programar();
+    });
+
+    carrusel.addEventListener('keydown', (evento) => {
+      if (evento.key === 'ArrowRight') {
+        evento.preventDefault();
+        avanzar(1, true);
+      } else if (evento.key === 'ArrowLeft') {
+        evento.preventDefault();
+        avanzar(-1, true);
+      }
+    });
+
+    let cuadro = 0;
+    pista.addEventListener(
+      'scroll',
+      () => {
+        window.cancelAnimationFrame(cuadro);
+        cuadro = window.requestAnimationFrame(actualizarContador);
+      },
+      { passive: true },
+    );
+
+    /* ---------- Pestañas: Todas / Hotel / Restaurante ---------- */
+    pestanas.forEach((pestana) => {
+      pestana.addEventListener('click', () => {
+        const filtro = pestana.dataset.filtro;
+        pestanas.forEach((otra) => otra.setAttribute('aria-pressed', String(otra === pestana)));
+        tarjetas.forEach((tarjeta) => {
+          tarjeta.hidden = filtro !== 'todas' && tarjeta.dataset.refiere !== filtro;
+        });
+        pista.scrollTo({ left: 0, behavior: 'auto' });
+        actualizarControles();
+        medirTextos();
+        if (estado) estado.textContent = posicion(1, visibles().length);
+        programar();
+      });
+    });
+
+    /* ---------- "Leer más" ---------- */
+    const medirTextos = () => {
+      tarjetas.forEach((tarjeta) => {
+        const texto = tarjeta.querySelector<HTMLElement>('[data-texto]');
+        const boton = tarjeta.querySelector<HTMLButtonElement>('[data-leer-mas]');
+        if (!texto || !boton || tarjeta.hidden) return;
+        if (texto.classList.contains('abierta')) return;
+        boton.hidden = texto.scrollHeight <= texto.clientHeight + 1;
+      });
+    };
+
+    tarjetas.forEach((tarjeta) => {
+      const texto = tarjeta.querySelector<HTMLElement>('[data-texto]');
+      const boton = tarjeta.querySelector<HTMLButtonElement>('[data-leer-mas]');
+      if (!texto || !boton) return;
+      boton.addEventListener('click', () => {
+        const abierta = texto.classList.toggle('abierta');
+        boton.setAttribute('aria-expanded', String(abierta));
+        boton.textContent = (abierta ? boton.dataset.menos : boton.dataset.mas) ?? '';
+      });
+    });
+
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(() => {
+        medirTextos();
+        actualizarControles();
+        programar();
+      }).observe(pista);
+    }
+    document.fonts?.ready.then(medirTextos);
+
+    medirTextos();
+    actualizarControles();
+    programar();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-resenas]').forEach(iniciarResenas);
+</script>

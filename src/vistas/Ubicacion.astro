@@ -1,0 +1,287 @@
+---
+import Base from '../layouts/Base.astro';
+import Boton from '../components/Boton.astro';
+import Icono from '../components/Icono.astro';
+import Mapa from '../components/Mapa.astro';
+import Pendiente from '../components/Pendiente.astro';
+import { hotel, restaurante, type Idioma } from '../data/negocio';
+import { lugares, llegadas } from '../data/lugares';
+import { ruta } from '../i18n/rutas';
+import { t } from '../i18n/textos';
+import { enlaceWhatsApp, eventoWhatsApp, enlaceComoLlegar } from '../lib/whatsapp';
+
+interface Props {
+  idioma: Idioma;
+}
+
+const { idioma } = Astro.props;
+const textos = t(idioma);
+const u = textos.ubicacion;
+const f = u.formulario;
+const d = hotel.direccion;
+
+const destino = encodeURIComponent(hotel.busquedaMapa);
+const rutaDesde = (origen: string) =>
+  `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origen)}&destination=${destino}`;
+const rutaAPie = (lugar: string) =>
+  `https://www.google.com/maps/dir/?api=1&origin=${destino}&destination=${encodeURIComponent(lugar)}&travelmode=walking`;
+
+const campo =
+  'mt-2 block min-h-12 w-full rounded-lg border border-tinta/35 bg-white px-4 py-2.5 text-base text-tinta';
+const enlace = 'font-medium underline decoration-cantera-300 underline-offset-4 hover:decoration-tinta';
+---
+
+<Base idioma={idioma} pagina="ubicacion" titulo={u.titulo} descripcion={u.descripcion}>
+  <section class="contenedor grid gap-10 pt-10 pb-14 lg:grid-cols-12 lg:gap-8 lg:pt-16 lg:pb-20">
+    <div class="lg:col-span-5">
+      <h1 class="text-pagina">{u.titulo}</h1>
+      <address class="mt-6 text-entrada not-italic">
+        {d.calle}<br />
+        {d.colonia}, C.P. {d.codigoPostal}<br />
+        {d.ciudad}, {d.estadoCorto}, {d.pais}
+      </address>
+      <p class="mt-4 max-w-[38ch] text-tinta-suave">{hotel.cercania[idioma]}.</p>
+
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+        <Boton href={enlaceComoLlegar()} externo evento="como_llegar_ubicacion">
+          <Icono nombre="pin" />
+          {textos.acciones.comoLlegar}
+        </Boton>
+        <Boton
+          href={`tel:${hotel.telefono.enlace}`}
+          variante="secundario"
+          evento="llamada_hotel_ubicacion"
+        >
+          <Icono nombre="telefono" />
+          {hotel.telefono.visible}
+        </Boton>
+      </div>
+    </div>
+
+    <Mapa
+      idioma={idioma}
+      titulo={u.tituloMapa}
+      class="aspect-[4/3] lg:col-span-7 lg:aspect-auto lg:min-h-[30rem]"
+    />
+  </section>
+
+  <section class="bg-cantera-100">
+    <div class="contenedor grid gap-10 py-16 lg:grid-cols-12 lg:gap-8 lg:py-24">
+      <div class="lg:col-span-4">
+        <h2 class="text-seccion">{u.llegarTitulo}</h2>
+        <dl class="mt-8 border-t border-cantera-300">
+          {
+            u.llegar.map((dato) => (
+              <div class="border-b border-cantera-300 py-4">
+                <dt class="font-semibold">{dato.titulo}</dt>
+                <dd class="mt-0.5 text-tinta-suave">{dato.texto}</dd>
+              </div>
+            ))
+          }
+        </dl>
+
+        <h3 class="mt-8 font-texto text-base font-semibold tracking-normal">{u.rutasTitulo}</h3>
+        <ul class="mt-3 space-y-1">
+          <li>
+            <a
+              href={enlaceComoLlegar()}
+              class:list={['inline-flex min-h-11 items-center', enlace]}
+              target="_blank"
+              rel="noopener"
+              data-evento="ruta_desde_ubicacion_actual"
+            >
+              {u.rutaActual}
+            </a>
+          </li>
+          {
+            llegadas.map((llegada) => (
+              <li>
+                <a
+                  href={rutaDesde(llegada.busqueda)}
+                  class:list={['inline-flex min-h-11 items-center', enlace]}
+                  target="_blank"
+                  rel="noopener"
+                  data-evento={`ruta_desde_${llegada.clave}`}
+                >
+                  {llegada.nombre[idioma]}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="lg:col-span-7 lg:col-start-6">
+        <h2 class="text-seccion">{u.lugaresTitulo}</h2>
+        <p class="mt-4 max-w-[52ch] text-tinta-suave">
+          {u.lugaresTexto}{' '}
+          <Pendiente que={u.pendienteLugares} />
+        </p>
+        <ul class="mt-8 border-t border-cantera-300">
+          {
+            lugares.map((lugar) => (
+              <li class="flex flex-col gap-1 border-b border-cantera-300 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
+                <div>
+                  <p class="font-titulo text-2xl leading-tight font-semibold">{lugar.nombre}</p>
+                  <p class="text-tinta-suave">
+                    {lugar.descripcion[idioma]}
+                    {lugar.aPie && <span class="font-medium text-tinta">. {lugar.aPie[idioma]}</span>}
+                  </p>
+                </div>
+                <a
+                  href={rutaAPie(lugar.busqueda)}
+                  class:list={['inline-flex min-h-11 shrink-0 items-center whitespace-nowrap', enlace]}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={u.verRutaA(lugar.nombre)}
+                >
+                  {u.verRuta}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="contenedor grid gap-12 py-16 lg:grid-cols-12 lg:gap-8 lg:py-24">
+    <div class="lg:col-span-5">
+      <h2 class="text-seccion">{u.contactoTitulo}</h2>
+      <dl class="mt-8 border-t border-cantera-300">
+        <div class="border-b border-cantera-300 py-4">
+          <dt class="text-tinta-suave">{u.canales.whatsapp}</dt>
+          <dd class="mt-0.5">
+            {
+              hotel.whatsapp ? (
+                <a
+                  href={enlaceWhatsApp({ intencion: 'general', idioma })}
+                  class={enlace}
+                  target="_blank"
+                  rel="noopener"
+                  data-evento={eventoWhatsApp({ intencion: 'general' }) + '_ubicacion'}
+                >
+                  +{hotel.whatsapp}
+                </a>
+              ) : (
+                <Pendiente que={u.pendienteWhatsApp} />
+              )
+            }
+          </dd>
+        </div>
+        <div class="border-b border-cantera-300 py-4">
+          <dt class="text-tinta-suave">{u.canales.telefono}</dt>
+          <dd class="mt-0.5">
+            <a href={`tel:${hotel.telefono.enlace}`} class={enlace} data-evento="llamada_hotel_contacto">
+              {hotel.telefono.visible}
+            </a>
+          </dd>
+        </div>
+        <div class="border-b border-cantera-300 py-4">
+          <dt class="text-tinta-suave">{u.canales.correo}</dt>
+          <dd class="mt-0.5">
+            <a href={`mailto:${hotel.correo}`} class={enlace}>{hotel.correo}</a>
+          </dd>
+        </div>
+        <div class="border-b border-cantera-300 py-4">
+          <dt class="text-tinta-suave">{u.canales.restaurante} {restaurante.nombre}</dt>
+          <dd class="mt-0.5">
+            <a
+              href={`tel:${restaurante.telefono.enlace}`}
+              class={enlace}
+              data-evento="llamada_restaurante_contacto"
+            >
+              {restaurante.telefono.visible}
+            </a>
+          </dd>
+        </div>
+        <div class="border-b border-cantera-300 py-4">
+          <dt class="text-tinta-suave">{u.canales.facebook}</dt>
+          <dd class="mt-0.5">
+            <a href={hotel.facebook} class={enlace} target="_blank" rel="noopener">
+              facebook.com/hmariaelenadurango
+            </a>
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="lg:col-span-6 lg:col-start-7">
+      <h2 class="text-seccion">{f.titulo}</h2>
+      <p class="mt-4 text-tinta-suave">{f.ayuda}</p>
+
+      <!-- Formulario de Netlify Forms: funciona al publicar en Netlify (ver README). -->
+      <form
+        name="contacto"
+        method="POST"
+        action={ruta('gracias', idioma)}
+        data-netlify="true"
+        netlify-honeypot="empresa"
+        class="mt-8 space-y-5"
+      >
+        <input type="hidden" name="form-name" value="contacto" />
+        <input type="hidden" name="idioma" value={idioma} />
+        <p class="hidden">
+          <label>{f.trampa} <input name="empresa" tabindex="-1" autocomplete="off" /></label>
+        </p>
+
+        <div>
+          <label for="contacto-nombre" class="block font-semibold">{f.nombre}</label>
+          <input type="text" id="contacto-nombre" name="nombre" autocomplete="name" required class={campo} />
+        </div>
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="contacto-correo" class="block font-semibold">{f.correo}</label>
+            <input
+              type="email"
+              id="contacto-correo"
+              name="correo"
+              autocomplete="email"
+              inputmode="email"
+              required
+              class={campo}
+            />
+          </div>
+          <div>
+            <label for="contacto-telefono" class="block font-semibold">{f.telefono}</label>
+            <input
+              type="tel"
+              id="contacto-telefono"
+              name="telefono"
+              autocomplete="tel"
+              inputmode="tel"
+              class={campo}
+            />
+          </div>
+        </div>
+        <div>
+          <label for="contacto-mensaje" class="block font-semibold">{f.mensaje}</label>
+          <textarea id="contacto-mensaje" name="mensaje" rows="5" required class={campo}></textarea>
+        </div>
+
+        <p class="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id="contacto-aviso"
+            name="acepta-aviso"
+            value="si"
+            required
+            class="mt-1 size-5 shrink-0 accent-terracota"
+          />
+          <label for="contacto-aviso">
+            {f.consentimiento}{' '}
+            <a href={ruta('privacidad', idioma)} class={enlace}>{f.aviso}</a>.
+          </label>
+        </p>
+
+        <button
+          type="submit"
+          class="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full bg-terracota px-7 py-3 text-base font-semibold text-white transition-colors duration-200 hover:bg-barro sm:w-auto"
+          data-evento="formulario_contacto_enviar"
+        >
+          {f.enviar}
+        </button>
+      </form>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,36 @@
+---
+/**
+ * Página de "no encontrada". Se muestra en ambos idiomas porque no se
+ * puede saber de antemano qué idioma buscaba la persona.
+ */
+import Base from '../layouts/Base.astro';
+import Boton from '../components/Boton.astro';
+import { ruta } from '../i18n/rutas';
+---
+
+<Base
+  idioma="es"
+  pagina="inicio"
+  titulo="Página no encontrada | Hotel Casa María Elena"
+  descripcion="La página que buscas no existe o cambió de lugar."
+  sinIndexar
+>
+  <section class="contenedor py-20 lg:py-32">
+    <h1 class="text-pagina">No encontramos esa página</h1>
+    <p class="mt-5 max-w-[46ch] text-entrada text-tinta-suave">
+      Puede que la dirección haya cambiado. Desde el inicio llegas a todo el sitio.
+    </p>
+    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+      <Boton href={ruta('inicio', 'es')}>Ir al inicio</Boton>
+      <Boton href={ruta('habitaciones', 'es')} variante="secundario">Ver las habitaciones</Boton>
+    </div>
+
+    <div class="mt-16 border-t border-cantera-300 pt-10" lang="en">
+      <h2 class="text-seccion">We could not find that page</h2>
+      <p class="mt-4 max-w-[46ch] text-tinta-suave">
+        The address may have changed. You can reach everything from the home page.
+      </p>
+      <Boton href={ruta('inicio', 'en')} variante="secundario" class="mt-6">Go to the home page</Boton>
+    </div>
+  </section>
+</Base>

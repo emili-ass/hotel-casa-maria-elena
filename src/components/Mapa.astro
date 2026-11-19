@@ -1,0 +1,26 @@
+---
+/**
+ * Mapa de Google con la ubicación del hotel.
+ * Se carga solo cuando el visitante llega a esa parte de la página.
+ */
+import { hotel, type Idioma } from '../data/negocio';
+
+interface Props {
+  idioma: Idioma;
+  titulo: string;
+  class?: string;
+}
+
+const { idioma, titulo, class: clase = '' } = Astro.props;
+const direccion = `https://www.google.com/maps?q=${encodeURIComponent(hotel.busquedaMapa)}&z=16&hl=${idioma}&output=embed`;
+---
+
+<div class:list={['overflow-hidden bg-cantera-100', clase]}>
+  <iframe
+    src={direccion}
+    title={titulo}
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade"
+    allowfullscreen
+    class="block h-full w-full border-0"></iframe>
+</div>

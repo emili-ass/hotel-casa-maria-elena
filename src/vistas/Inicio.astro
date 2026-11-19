@@ -1,0 +1,288 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Boton from '../components/Boton.astro';
+import Icono from '../components/Icono.astro';
+import Mapa from '../components/Mapa.astro';
+import Pendiente from '../components/Pendiente.astro';
+import Resenas from '../components/Resenas.astro';
+import fotoPatio from '../assets/images/patio-1.jpg';
+import fotoRestaurante from '../assets/images/restaurante-2.jpg';
+import { hotel, restaurante, type Idioma } from '../data/negocio';
+import { habitaciones } from '../data/habitaciones';
+import { ruta } from '../i18n/rutas';
+import { t, hora } from '../i18n/textos';
+import { enlaceWhatsApp, eventoWhatsApp, enlaceComoLlegar } from '../lib/whatsapp';
+import { enFrase } from '../lib/texto';
+
+interface Props {
+  idioma: Idioma;
+}
+
+const { idioma } = Astro.props;
+const textos = t(idioma);
+const i = textos.inicio;
+
+const datos = [
+  { etiqueta: textos.horarios.checkIn, valor: hora(hotel.checkIn, idioma) },
+  { etiqueta: textos.horarios.checkOut, valor: hora(hotel.checkOut, idioma) },
+  {
+    etiqueta: `${restaurante.nombre}, ${restaurante.horario.dias[idioma].toLowerCase()}`,
+    valor: `${hora(restaurante.horario.abre, idioma)} – ${hora(restaurante.horario.cierra, idioma)}`,
+  },
+];
+
+const d = hotel.direccion;
+const google = restaurante.calificacionGoogle;
+
+// Platillos y bebidas que más mencionan las reseñas.
+const mencionados = restaurante.destacados
+  .filter((x) => ['chilaquiles', 'huevos-rancheros', 'capuchino'].includes(x.clave))
+  .map((x) => x[idioma]);
+---
+
+<Base idioma={idioma} pagina="inicio" titulo={i.titulo} descripcion={i.descripcion}>
+  <section class="contenedor pt-8 pb-14 lg:pt-14 lg:pb-20">
+    <div class="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-8">
+      <div class="lg:col-span-6 lg:pb-12">
+        <h1>
+          <span class="block font-texto text-base font-medium tracking-normal text-tinta-suave">
+            {hotel.nombre}, {hotel.direccion.ciudad}
+          </span>
+          <span class="mt-3 block text-portada">{hotel.lema[idioma]}</span>
+        </h1>
+
+        <p class="mt-6 max-w-[34ch] text-entrada text-tinta-suave">{i.entrada}</p>
+
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Boton
+            href={enlaceWhatsApp({ intencion: 'reservar', idioma })}
+            evento={eventoWhatsApp({ intencion: 'reservar' }) + '_portada'}
+            externo
+          >
+            <Icono nombre="whatsapp" />
+            {textos.acciones.reservar}
+          </Boton>
+          <Boton href={ruta('restaurante', idioma)} variante="secundario">
+            {textos.acciones.verRestaurante}
+          </Boton>
+        </div>
+        <p class="mt-4 max-w-[42ch] text-sm text-tinta-suave">{textos.whatsappNota}</p>
+      </div>
+
+      <div class="lg:col-span-5 lg:col-start-8">
+        <div class="marco marco-portada">
+          <Picture
+            src={fotoPatio}
+            alt={i.fotoPortada}
+            formats={['avif', 'webp']}
+            widths={[480, 768, 1080, 1440]}
+            sizes="(min-width: 64rem) 38vw, 100vw"
+            loading="eager"
+            fetchpriority="high"
+            class="aspect-[4/5] w-full object-cover"
+            pictureAttributes={{ class: 'arco block' }}
+          />
+        </div>
+      </div>
+    </div>
+
+    <dl class="mt-12 grid gap-x-8 border-t border-cantera-300 sm:grid-cols-3 lg:mt-16">
+      {
+        datos.map((dato) => (
+          <div class="flex items-baseline justify-between gap-4 border-b border-cantera-300 py-4 sm:block sm:border-b-0 sm:py-5">
+            <dt class="text-sm text-tinta-suave">{dato.etiqueta}</dt>
+            <dd class="font-titulo text-2xl leading-none font-semibold whitespace-nowrap sm:mt-2 sm:text-3xl">
+              {dato.valor}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="bg-cantera-100">
+    <div class="contenedor grid gap-8 py-16 lg:grid-cols-12 lg:gap-8 lg:py-24">
+      <h2 class="text-seccion lg:col-span-4">{i.razonesTitulo}</h2>
+      <ul class="lg:col-span-7 lg:col-start-6">
+        {
+          i.razones.map((razon) => (
+            <li class="border-t border-cantera-300 py-6 first:border-t-0 first:pt-0 lg:py-8" data-revelar>
+              <h3 class="text-subtitulo">{razon.titulo}</h3>
+              <p class="mt-2 max-w-[52ch] text-tinta-suave">{razon.texto}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="contenedor py-16 lg:py-24">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <h2 class="text-seccion">{i.habitaciones.titulo}</h2>
+        <p class="mt-4 max-w-[48ch] text-tinta-suave">{i.habitaciones.texto}</p>
+      </div>
+      <Boton href={ruta('habitaciones', idioma)} variante="secundario" class="self-start lg:self-auto">
+        {textos.acciones.verHabitaciones}
+      </Boton>
+    </div>
+
+    <ul
+      class="-mx-5 mt-10 flex snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto px-5 pb-4 md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0"
+    >
+      {
+        habitaciones.map((habitacion, indice) => (
+          <li class="w-[80%] shrink-0 snap-start md:w-auto">
+            <a href={`${ruta('habitaciones', idioma)}#${habitacion.clave}`} class="group block">
+              <Picture
+                src={habitacion.foto}
+                alt={habitacion.fotoAlt[idioma]}
+                formats={['avif', 'webp']}
+                widths={[360, 540, 800]}
+                sizes="(min-width: 48rem) 30vw, 80vw"
+                loading="lazy"
+                class="aspect-[4/3] w-full object-cover"
+              />
+              <span class="mt-3 block font-titulo text-2xl leading-tight font-semibold underline decoration-transparent underline-offset-4 transition-colors group-hover:decoration-cantera-300">
+                {habitacion.nombre?.[idioma] ?? textos.habitaciones.tipo(indice + 1)}
+              </span>
+            </a>
+            {!habitacion.nombre && (
+              <p class="mt-1">
+                <Pendiente que={textos.habitaciones.pendientes.nombre} />
+              </p>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="bg-patio text-cal">
+    <div class="contenedor grid gap-10 py-16 lg:grid-cols-12 lg:items-center lg:gap-8 lg:py-24">
+      <div class="mx-auto w-full max-w-md lg:col-span-5 lg:max-w-none">
+        <div class="marco marco-claro">
+          <Picture
+            src={fotoRestaurante}
+            alt={i.restaurante.fotoAlt}
+            formats={['avif', 'webp']}
+            widths={[480, 768, 1080]}
+            sizes="(min-width: 64rem) 38vw, (min-width: 30rem) 28rem, 100vw"
+            loading="lazy"
+            class="aspect-[4/5] w-full object-cover"
+            pictureAttributes={{ class: 'arco block' }}
+          />
+        </div>
+      </div>
+
+      <div class="lg:col-span-6 lg:col-start-7">
+        <h2 class="text-pagina font-medium italic">{restaurante.nombre}</h2>
+        <p class="mt-5 max-w-[42ch] text-entrada text-cal/85">{i.restaurante.texto}</p>
+
+        <dl class="mt-8 border-t border-cal/25">
+          <div class="border-b border-cal/25 py-3.5 sm:flex sm:items-baseline sm:justify-between sm:gap-6">
+            <dt class="text-cal/80">{i.restaurante.horario}</dt>
+            <dd class="mt-0.5 font-medium sm:mt-0 sm:text-right">
+              {
+                `${restaurante.horario.dias[idioma]}, ${hora(restaurante.horario.abre, idioma)} – ${hora(restaurante.horario.cierra, idioma)}`
+              }
+            </dd>
+          </div>
+          <div class="border-b border-cal/25 py-3.5 sm:flex sm:items-baseline sm:justify-between sm:gap-6">
+            <dt class="text-cal/80">{i.restaurante.google}</dt>
+            <dd class="mt-0.5 flex items-center gap-1.5 font-medium sm:mt-0 sm:text-right">
+              <Icono nombre="estrella" class="size-4 shrink-0" />
+              {i.restaurante.calificacion(google.promedio, google.total[idioma])}
+            </dd>
+          </div>
+          <div class="border-b border-cal/25 py-3.5 sm:flex sm:items-baseline sm:justify-between sm:gap-6">
+            <dt class="text-cal/80">{i.restaurante.mencionan}</dt>
+            <dd class="mt-0.5 font-medium sm:mt-0 sm:text-right">{enFrase(mencionados)}</dd>
+          </div>
+        </dl>
+
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Boton href={ruta('restaurante', idioma)} variante="claro">
+            {textos.acciones.verRestaurante}
+          </Boton>
+          <Boton
+            href={`tel:${restaurante.telefono.enlace}`}
+            variante="contornoClaro"
+            evento="llamada_restaurante_inicio"
+          >
+            <Icono nombre="telefono" />
+            {i.restaurante.llamar(restaurante.telefono.visible)}
+          </Boton>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Resenas idioma={idioma} variante="corta" class="bg-cantera-100 py-16 lg:py-24" />
+
+  <section class="contenedor grid gap-8 py-16 lg:grid-cols-12 lg:gap-8 lg:py-24">
+    <div class="lg:col-span-4">
+      <h2 class="text-seccion">{i.mapa.titulo}</h2>
+      <address class="mt-6 text-entrada not-italic">
+        {d.calle}<br />
+        {d.colonia}, C.P. {d.codigoPostal}<br />
+        {d.ciudad}, {d.estadoCorto}
+      </address>
+      <p class="mt-4 max-w-[36ch] text-tinta-suave">{hotel.cercania[idioma]}.</p>
+      <Boton
+        href={enlaceComoLlegar()}
+        variante="secundario"
+        externo
+        evento="como_llegar_inicio"
+        class="mt-7"
+      >
+        <Icono nombre="pin" />
+        {textos.acciones.comoLlegar}
+      </Boton>
+    </div>
+
+    <Mapa
+      idioma={idioma}
+      titulo={i.mapa.tituloMapa}
+      class="aspect-[4/3] lg:col-span-7 lg:col-start-6 lg:aspect-auto lg:min-h-[28rem]"
+    />
+  </section>
+</Base>
+
+<style>
+  /* Línea de cantera que rodea la foto, como el marco de piedra de un arco. */
+  .marco {
+    position: relative;
+    padding: 0.75rem;
+  }
+
+  .marco::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--color-cantera-300);
+    border-radius: 999px 999px 0 0;
+    pointer-events: none;
+  }
+
+  .marco-claro::before {
+    border-color: rgb(250 246 239 / 0.45);
+  }
+
+  /* Único movimiento al cargar: la foto de portada se asienta dentro del arco. */
+  @media (prefers-reduced-motion: no-preference) {
+    .marco-portada :global(img) {
+      animation: asentar 1.8s var(--ease-suave) both;
+    }
+  }
+
+  @keyframes asentar {
+    from {
+      transform: scale(1.08);
+    }
+    to {
+      transform: none;
+    }
+  }
+</style>

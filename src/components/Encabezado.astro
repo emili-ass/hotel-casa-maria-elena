@@ -1,0 +1,185 @@
+---
+import Boton from './Boton.astro';
+import Icono from './Icono.astro';
+import { hotel, type Idioma } from '../data/negocio';
+import { ruta, otroIdioma, codigoIdioma, type ClavePagina } from '../i18n/rutas';
+import { t } from '../i18n/textos';
+import { enlaceWhatsApp, eventoWhatsApp } from '../lib/whatsapp';
+
+interface Props {
+  idioma: Idioma;
+  pagina: ClavePagina;
+}
+
+const { idioma, pagina } = Astro.props;
+const textos = t(idioma);
+const otro = otroIdioma(idioma);
+
+const enlaces: { clave: ClavePagina; texto: string }[] = [
+  { clave: 'habitaciones', texto: textos.paginas.habitaciones },
+  { clave: 'restaurante', texto: textos.paginas.restaurante },
+  { clave: 'galeria', texto: textos.paginas.galeria },
+  { clave: 'ubicacion', texto: textos.navegacion.ubicacion },
+];
+
+const esActual = (clave: ClavePagina) =>
+  pagina === clave || (clave === 'restaurante' && pagina === 'menu');
+---
+
+<header class="sticky top-0 z-30 border-b border-cantera-300/70 bg-cal/95 backdrop-blur-sm print:static">
+  <div class="contenedor flex h-16 items-center justify-between gap-3 lg:h-20">
+    <a
+      href={ruta('inicio', idioma)}
+      class="font-titulo text-[1.4rem] leading-none font-semibold tracking-tight whitespace-nowrap lg:text-[1.7rem]"
+      aria-label={hotel.nombre}
+    >
+      <span class="max-sm:hidden">Hotel </span>{hotel.nombreCorto}
+    </a>
+
+    <nav class="max-lg:hidden" aria-label={textos.menu.principal}>
+      <ul class="flex items-center gap-8 text-[0.95rem] font-medium">
+        {
+          enlaces.map(({ clave, texto }) => (
+            <li>
+              <a
+                href={ruta(clave, idioma)}
+                aria-current={esActual(clave) ? 'page' : undefined}
+                class="enlace-nav py-2"
+              >
+                {texto}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-1 lg:gap-5">
+      <a
+        href={ruta(pagina, otro)}
+        hreflang={codigoIdioma[otro]}
+        lang={codigoIdioma[otro]}
+        title={textos.menu.idiomaDescripcion}
+        class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-2 text-[0.95rem] font-medium text-tinta-suave hover:text-tinta"
+      >
+        <span class="sm:hidden" aria-hidden="true">{otro.toUpperCase()}</span>
+        <span class="max-sm:sr-only">{textos.menu.idioma}</span>
+      </a>
+
+      <Boton
+        href={enlaceWhatsApp({ intencion: 'reservar', idioma })}
+        evento={eventoWhatsApp({ intencion: 'reservar' }) + '_encabezado'}
+        externo
+        class="whitespace-nowrap max-lg:hidden"
+        aria-label={textos.acciones.reservar}
+      >
+        {textos.acciones.reservarCorto}
+      </Boton>
+
+      <details class="menu-movil lg:hidden">
+        <summary
+          class="flex size-11 cursor-pointer list-none items-center justify-center rounded-full hover:bg-tinta/5"
+          aria-label={textos.menu.abrir}
+          data-abrir={textos.menu.abrir}
+          data-cerrar={textos.menu.cerrar}
+        >
+          <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
+            <path class="icono-abrir" d="M4 7h16M4 12h16M4 17h16"></path>
+            <path class="icono-cerrar" d="M6 6l12 12M18 6L6 18"></path>
+          </svg>
+        </summary>
+
+        <nav
+          class="absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-cantera-300 bg-cal shadow-xl shadow-tinta/10"
+          aria-label={textos.menu.principal}
+        >
+          <ul class="contenedor pt-2 pb-6">
+            {
+              [{ clave: 'inicio' as ClavePagina, texto: textos.paginas.inicio }, ...enlaces].map(
+                ({ clave, texto }) => (
+                  <li class="border-b border-cantera-100">
+                    <a
+                      href={ruta(clave, idioma)}
+                      aria-current={esActual(clave) ? 'page' : undefined}
+                      class="block py-3.5 font-titulo text-[1.75rem] leading-tight font-semibold aria-[current=page]:text-barro"
+                    >
+                      {texto}
+                    </a>
+                  </li>
+                ),
+              )
+            }
+            <li class="pt-5">
+              <a
+                href={`tel:${hotel.telefono.enlace}`}
+                class="inline-flex min-h-11 items-center gap-2.5 font-medium"
+                data-evento="llamada_hotel_menu"
+              >
+                <Icono nombre="telefono" />
+                {hotel.telefono.visible}
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+<style>
+  .enlace-nav {
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.5em;
+    transition: text-decoration-color 0.2s;
+  }
+
+  .enlace-nav:hover {
+    text-decoration-color: var(--color-cantera-300);
+  }
+
+  .enlace-nav[aria-current='page'] {
+    text-decoration-color: var(--color-terracota);
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .icono-cerrar,
+  details[open] .icono-abrir {
+    display: none;
+  }
+
+  details[open] .icono-cerrar {
+    display: inline;
+  }
+</style>
+
+<script>
+  // Mejora del menú de celular: Escape o un toque fuera lo cierran.
+  // Sin JavaScript el menú sigue funcionando (es un <details> nativo).
+  const menu = document.querySelector<HTMLDetailsElement>('details.menu-movil');
+  const resumen = menu?.querySelector('summary');
+
+  if (menu && resumen) {
+    menu.addEventListener('toggle', () => {
+      const etiqueta = menu.open ? resumen.dataset.cerrar : resumen.dataset.abrir;
+      if (etiqueta) resumen.setAttribute('aria-label', etiqueta);
+    });
+
+    document.addEventListener('keydown', (evento) => {
+      if (evento.key === 'Escape' && menu.open) {
+        menu.open = false;
+        resumen.focus();
+      }
+    });
+
+    document.addEventListener('click', (evento) => {
+      if (menu.open && evento.target instanceof Node && !menu.contains(evento.target)) {
+        menu.open = false;
+      }
+    });
+  }
+</script>

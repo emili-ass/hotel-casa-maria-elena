@@ -1,0 +1,47 @@
+---
+/**
+ * Botón con forma de enlace.
+ *  - primario: terracota, la acción principal de la pantalla.
+ *  - secundario: contorno, para la acción alternativa.
+ *  - claro: para usar sobre fondos oscuros (verde patio).
+ * `evento` nombra el clic para medirlo (ver README, sección Medición).
+ */
+interface Props {
+  href: string;
+  variante?: 'primario' | 'secundario' | 'claro' | 'contornoClaro';
+  evento?: string;
+  externo?: boolean;
+  class?: string;
+  [atributo: string]: unknown;
+}
+
+const {
+  href,
+  variante = 'primario',
+  evento,
+  externo = false,
+  class: clase = '',
+  ...resto
+} = Astro.props;
+
+const base =
+  'inline-flex min-h-12 items-center justify-center gap-2.5 rounded-full px-6 py-3 text-base font-semibold leading-tight transition-colors duration-200';
+
+const variantes = {
+  primario: 'bg-terracota text-white hover:bg-barro',
+  secundario: 'border border-tinta/35 text-tinta hover:border-tinta hover:bg-tinta/5',
+  claro: 'bg-cal text-patio-oscuro hover:bg-white',
+  contornoClaro: 'border border-cal/50 text-cal hover:border-cal hover:bg-cal/10',
+};
+---
+
+<a
+  href={href}
+  class:list={[base, variantes[variante], clase]}
+  data-evento={evento}
+  target={externo ? '_blank' : undefined}
+  rel={externo ? 'noopener' : undefined}
+  {...resto}
+>
+  <slot />
+</a>

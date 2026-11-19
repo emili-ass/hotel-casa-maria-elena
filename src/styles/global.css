@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Tokens de diseño
+   Paleta: cal (muro encalado), cantera (piedra), terracota (barro),
+   patio y hoja (plantas), tinta (madera oscura).
+   Contrastes verificados (WCAG AA):
+     tinta sobre cal ............ 14.6:1
+     tinta-suave sobre cal ...... 7.4:1
+     terracota sobre cal ........ 5.3:1
+     blanco sobre terracota ..... 5.8:1
+     barro sobre cantera-100 .... 5.9:1
+     cal sobre patio ............ 9.0:1
+   "hoja" da 3.4:1 sobre cal: solo decoración, nunca texto.
+------------------------------------------------------------------- */
+@theme inline {
+  --font-titulo: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  --font-texto: var(--font-figtree), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@theme {
+  --color-cal: #faf6ef;
+  --color-cantera-100: #ebe0d0;
+  --color-cantera-300: #c9b49a;
+  --color-terracota: #a8491f;
+  --color-barro: #8a3a17;
+  --color-patio: #2f4a3a;
+  --color-patio-oscuro: #233a2c;
+  --color-hoja: #6b8f71;
+  --color-tinta: #2b211b;
+  --color-tinta-suave: #5c4e44;
+
+  /* Escala tipográfica (razón ~1.25, fluida entre celular y escritorio) */
+  --text-portada: clamp(3rem, 2rem + 6vw, 6.25rem);
+  --text-portada--line-height: 0.95;
+  --text-pagina: clamp(2.75rem, 2rem + 4vw, 4.75rem);
+  --text-pagina--line-height: 1;
+  --text-seccion: clamp(2.25rem, 1.75rem + 2.4vw, 3.5rem);
+  --text-seccion--line-height: 1.05;
+  --text-subtitulo: clamp(1.5rem, 1.35rem + 0.8vw, 1.875rem);
+  --text-subtitulo--line-height: 1.2;
+  --text-entrada: clamp(1.125rem, 1.05rem + 0.4vw, 1.3125rem);
+  --text-entrada--line-height: 1.55;
+
+  --ease-suave: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@layer base {
+  html {
+    background-color: var(--color-cal);
+    color: var(--color-tinta);
+    font-family: var(--font-texto);
+    font-size: 106.25%; /* 17px de base: lectura cómoda en celular */
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    min-height: 100dvh;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-titulo);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Cormorant trae cifras de estilo antiguo; en horarios, precios y
+     calificaciones se leen mejor las cifras alineadas. */
+  h1,
+  h2,
+  h3,
+  .font-titulo {
+    font-variant-numeric: lining-nums;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-terracota);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-cantera-300);
+    color: var(--color-tinta);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+/* Ancho de página con margen lateral cómodo en celular */
+@utility contenedor {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+
+  @media (width >= 48rem) {
+    padding-inline: 2.5rem;
+  }
+}
+
+/* Arco de cantera: la forma que identifica al sitio.
+   Recorta la foto como el vano de una arcada colonial. */
+@utility arco {
+  border-radius: 999px 999px 0 0;
+  overflow: hidden;
+}
+
+/* Marcador visible para datos que el hotel aún no confirma.
+   Buscar "POR CONFIRMAR" en el sitio para encontrarlos todos. */
+@utility pendiente {
+  display: inline;
+  padding: 0.05em 0.35em;
+  border: 1px dashed var(--color-barro);
+  border-radius: 0.25rem;
+  background-color: #fff4d6;
+  color: var(--color-tinta);
+  font-family: var(--font-texto);
+  font-size: 0.875em;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* Aparición discreta al hacer scroll.
+   Solo actúa si hay JavaScript y el usuario no pidió reducir movimiento;
+   sin eso, el contenido se ve desde el inicio. */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-revelar] {
+    opacity: 0;
+    transform: translateY(1rem);
+    transition:
+      opacity 0.7s var(--ease-suave),
+      transform 0.7s var(--ease-suave);
+  }
+
+  .js [data-revelar].visible {
+    opacity: 1;
+    transform: none;
+  }
+}

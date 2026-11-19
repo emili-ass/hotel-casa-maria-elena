@@ -1,0 +1,141 @@
+---
+import Icono from './Icono.astro';
+import Pendiente from './Pendiente.astro';
+import { hotel, restaurante, type Idioma } from '../data/negocio';
+import { ruta, type ClavePagina } from '../i18n/rutas';
+import { t, hora } from '../i18n/textos';
+
+interface Props {
+  idioma: Idioma;
+}
+
+const { idioma } = Astro.props;
+const textos = t(idioma);
+const d = hotel.direccion;
+
+const paginas: ClavePagina[] = [
+  'habitaciones',
+  'restaurante',
+  'menu',
+  'galeria',
+  'ubicacion',
+  'politicas',
+  'privacidad',
+];
+
+const enlace = 'underline decoration-cal/40 underline-offset-4 hover:decoration-cal';
+---
+
+<footer class="bg-patio text-cal print:hidden">
+  <div class="contenedor grid gap-12 pt-16 pb-12 md:grid-cols-12 md:gap-8">
+    <div class="md:col-span-5">
+      <p class="font-titulo text-[2rem] leading-none font-semibold">{hotel.nombre}</p>
+      <p class="mt-2 font-titulo text-xl text-cal/80 italic">{hotel.lema[idioma]}</p>
+
+      <address class="mt-7 space-y-3 not-italic">
+        <p class="flex gap-3">
+          <Icono nombre="pin" class="mt-1 size-5 shrink-0" />
+          <span>
+            <span class="sr-only">{textos.pie.direccion}: </span>
+            {d.calle}<br />
+            {d.colonia}, C.P. {d.codigoPostal}<br />
+            {d.ciudad}, {d.estadoCorto}
+          </span>
+        </p>
+        <p class="flex gap-3">
+          <Icono nombre="telefono" class="mt-1 size-5 shrink-0" />
+          <span>
+            <span class="sr-only">{textos.pie.telefono}: </span>
+            <a href={`tel:${hotel.telefono.enlace}`} class={enlace} data-evento="llamada_hotel_pie">
+              {hotel.telefono.visible}
+            </a>
+          </span>
+        </p>
+        <p class="flex gap-3">
+          <Icono nombre="whatsapp" class="mt-1 size-5 shrink-0" />
+          <span>
+            <span class="sr-only">WhatsApp: </span>
+            {
+              hotel.whatsapp ? (
+                <a href={`https://wa.me/${hotel.whatsapp}`} class={enlace} data-evento="whatsapp_hotel_pie">
+                  +{hotel.whatsapp}
+                </a>
+              ) : (
+                <Pendiente que="WhatsApp del hotel" />
+              )
+            }
+          </span>
+        </p>
+        <p class="flex gap-3">
+          <Icono nombre="correo" class="mt-1 size-5 shrink-0" />
+          <span>
+            <span class="sr-only">{textos.pie.correo}: </span>
+            <a href={`mailto:${hotel.correo}`} class={enlace}>{hotel.correo}</a>
+          </span>
+        </p>
+      </address>
+    </div>
+
+    <div class="md:col-span-4">
+      <p class="font-titulo text-2xl leading-none font-semibold">{restaurante.nombre}</p>
+      <p class="mt-2 text-cal/80">{restaurante.descripcion[idioma]}</p>
+
+      <div class="mt-7 space-y-3">
+        <p class="flex gap-3">
+          <Icono nombre="reloj" class="mt-1 size-5 shrink-0" />
+          <span>
+            <span class="sr-only">{textos.pie.horario}: </span>
+            {
+              `${restaurante.horario.dias[idioma]}, ${textos.pie.de} ${hora(restaurante.horario.abre, idioma)} ${textos.pie.a} ${hora(restaurante.horario.cierra, idioma)}`
+            }
+          </span>
+        </p>
+        <p class="flex gap-3">
+          <Icono nombre="telefono" class="mt-1 size-5 shrink-0" />
+          <span>
+            <span class="sr-only">{textos.pie.telefono}: </span>
+            <a
+              href={`tel:${restaurante.telefono.enlace}`}
+              class={enlace}
+              data-evento="llamada_restaurante_pie"
+            >
+              {restaurante.telefono.visible}
+            </a>
+          </span>
+        </p>
+      </div>
+    </div>
+
+    <nav class="md:col-span-3" aria-label={textos.pie.sitio}>
+      <p class="font-titulo text-2xl leading-none font-semibold">{textos.pie.sitio}</p>
+      <ul class="mt-6 space-y-2.5">
+        {
+          paginas.map((clave) => (
+            <li>
+              <a href={ruta(clave, idioma)} class={enlace}>
+                {textos.paginas[clave]}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+
+  <div class="border-t border-cal/20">
+    <div
+      class="contenedor flex flex-col gap-3 pt-6 pb-24 text-sm text-cal/80 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p>© {new Date().getFullYear()} {hotel.nombre}. {textos.pie.derechos}</p>
+      <a
+        href={hotel.facebook}
+        class="inline-flex min-h-11 items-center gap-2 hover:text-cal"
+        target="_blank"
+        rel="noopener"
+      >
+        <Icono nombre="facebook" />
+        {textos.pie.facebook}
+      </a>
+    </div>
+  </div>
+</footer>

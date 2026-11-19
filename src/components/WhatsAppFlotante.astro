@@ -1,0 +1,58 @@
+---
+/**
+ * Botón flotante de contacto, siempre visible en la esquina inferior.
+ *  - En el sitio del hotel: WhatsApp del hotel.
+ *  - En las páginas del restaurante: WhatsApp del restaurante. Mientras ese
+ *    número no esté en negocio.ts, el botón llama por teléfono al restaurante.
+ */
+import Icono from './Icono.astro';
+import { restaurante, type Idioma } from '../data/negocio';
+import { t } from '../i18n/textos';
+import { enlaceWhatsApp, eventoWhatsApp, type DestinoWhatsApp } from '../lib/whatsapp';
+
+interface Props {
+  idioma: Idioma;
+  destino?: DestinoWhatsApp;
+}
+
+const { idioma, destino = 'hotel' } = Astro.props;
+const textos = t(idioma);
+
+const llamar = destino === 'restaurante' && !restaurante.whatsapp;
+const intencion = destino === 'restaurante' ? 'restaurante' : 'general';
+
+const boton = llamar
+  ? {
+      href: `tel:${restaurante.telefono.enlace}`,
+      etiqueta: textos.restaurante.llamar(restaurante.telefono.visible),
+      texto: textos.acciones.llamar,
+      evento: 'llamada_restaurante_flotante',
+    }
+  : {
+      href: enlaceWhatsApp({ intencion, idioma, destino }),
+      etiqueta:
+        destino === 'restaurante'
+          ? textos.acciones.whatsappRestaurante
+          : textos.acciones.whatsappHotel,
+      texto: textos.acciones.whatsapp,
+      evento: eventoWhatsApp({ intencion, destino }) + '_flotante',
+    };
+---
+
+<a
+  href={boton.href}
+  class="flotante fixed right-4 z-40 inline-flex min-h-13 items-center gap-2.5 rounded-full bg-patio py-3 pr-5 pl-4 text-base font-semibold text-cal shadow-lg ring-1 shadow-patio-oscuro/25 ring-cal/25 transition-colors duration-200 hover:bg-patio-oscuro print:hidden"
+  target={llamar ? undefined : '_blank'}
+  rel={llamar ? undefined : 'noopener'}
+  aria-label={boton.etiqueta}
+  data-evento={boton.evento}
+>
+  <Icono nombre={llamar ? 'telefono' : 'whatsapp'} class="size-6" />
+  <span aria-hidden="true">{boton.texto}</span>
+</a>
+
+<style>
+  .flotante {
+    bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+</style>
