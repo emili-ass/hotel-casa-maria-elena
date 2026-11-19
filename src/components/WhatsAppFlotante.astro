@@ -55,4 +55,12 @@ const boton = llamar
   .flotante {
     bottom: max(1rem, env(safe-area-inset-bottom));
   }
+
+  /* En el plan gratuito, Netlify añade una insignia "Powered by Netlify" fija
+     en la esquina inferior derecha (64 px de alto) que taparía este botón.
+     Cuando esa insignia existe, el botón se coloca justo encima de ella.
+     Si el plan cambia y la insignia desaparece, el botón vuelve solo a la esquina. */
+  :global(html:has(script[data-nf-variant='public'])) .flotante {
+    bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
 </style>
